@@ -1,0 +1,3 @@
+// src/controllers/appointmentController.js
+// Handles CRUD for appointments
+// ...existing code...

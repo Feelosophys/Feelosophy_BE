@@ -1,0 +1,3 @@
+// src/services/courseService.js
+// Handles business logic for courses
+// ...existing code...

@@ -1,0 +1,3 @@
+// src/services/appointmentService.js
+// Handles business logic for appointments
+// ...existing code...

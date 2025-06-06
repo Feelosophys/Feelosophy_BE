@@ -1,0 +1,3 @@
+// src/controllers/courseController.js
+// Handles CRUD for courses
+// ...existing code...
