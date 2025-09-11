@@ -28,6 +28,7 @@ A modular, well-structured Node.js backend using Express.js and MongoDB, inspire
    ```sh
    npm run dev
    ```
+6. go to the .env file with connect string to connect to mông db 
 
 ## API Docs
 Visit [http://localhost:5000/api-docs](http://localhost:5000/api-docs) after starting the server.
