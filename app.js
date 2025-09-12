@@ -11,7 +11,10 @@ const {
 } = require('./src/config/swaggerConfig');
 const errorHandler = require('./src/middlewares/errorHandler');
 
+// create for api 
 const authRoutes = require('./src/routes/authRoutes');
+const blogRoutes = require('./src/routes/blogRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 // const courseRoutes = require('./src/routes/courseRoutes');
 // const appointmentRoutes = require('./src/routes/appointmentRoutes');
 
@@ -27,6 +30,8 @@ app.use(morgan('dev'));
 
 // Mount API routers
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/blogs', blogRoutes);
+app.use('/api/v1/users', userRoutes);
 // app.use('/api/v1/courses', courseRoutes);
 // app.use('/api/v1/appointments', appointmentRoutes);
 
