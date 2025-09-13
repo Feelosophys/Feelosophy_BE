@@ -15,20 +15,21 @@ A modular, well-structured Node.js backend using Express.js and MongoDB, inspire
    ```
 2. **Copy `.env.example` to `.env` and fill in your values**
    (Or use the provided `.env` file. Ensure `MONGODB_URI` matches the Docker MongoDB config.)
-3. **Start MongoDB with Docker Compose**
+   // skip cx duoc 
+4. **Start MongoDB with Docker Compose**
    ```sh
    docker-compose up -d
    ```
    This will run MongoDB in a container with the correct credentials and port.
-4. **Install dependencies**
+5. **Install dependencies**
    ```sh
    npm install
    ```
-5. **Start the server**
+6. **Start the server**
    ```sh
    npm run dev
    ```
-6. go to the .env file with connect string to connect to mông db 
+7. go to the .env file with connect string to connect to mông db 
 
 ## API Docs
 Visit [http://localhost:5000/api-docs](http://localhost:5000/api-docs) after starting the server.
