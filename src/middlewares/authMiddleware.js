@@ -1,4 +1,3 @@
-// src/middlewares/authMiddleware.js
 const {
     verifyToken
 } = require('../config/jwtAuthConfig');

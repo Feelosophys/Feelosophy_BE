@@ -1,4 +1,3 @@
-// src/config/jwtAuthConfig.js
 const jwt = require('jsonwebtoken');
 
 function generateToken(payload) {
@@ -11,7 +10,19 @@ function verifyToken(token) {
     return jwt.verify(token, process.env.JWT_SECRET);
 }
 
+function generateRefreshToken(userId) {
+    return jwt.sign({
+            id: userId
+        },
+        process.env.JWT_SECRET, {
+            expiresIn: '7d'
+        }
+    );
+}
+
 module.exports = {
     generateToken,
-    verifyToken
+    verifyToken,
+    secret: process.env.JWT_SECRET,
+    generateRefreshToken
 };

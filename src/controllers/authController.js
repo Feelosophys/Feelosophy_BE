@@ -59,3 +59,65 @@ exports.login = catchAsync(async (req, res) => {
     const result = await authService.login(req.body);
     successResponse(res, 200, result, 'Login successful');
 });
+
+/**
+ * @swagger
+ * /api/v1/auth/refresh-token:
+ *   post:
+ *     summary: Refresh JWT access token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: New access token
+ */
+exports.refreshToken = catchAsync(async (req, res) => {
+    const {
+        refreshToken
+    } = req.body;
+    const result = await authService.refreshToken(refreshToken);
+    successResponse(res, 200, result, 'Token refreshed');
+});
+
+/**
+ * @swagger
+ * /api/v1/auth/change-password:
+ *   post:
+ *     summary: Change user password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed
+ */
+exports.changePassword = catchAsync(async (req, res) => {
+    const userId = req.user.id;
+    const {
+        oldPassword,
+        newPassword
+    } = req.body;
+    const result = await authService.changePassword({
+        userId,
+        oldPassword,
+        newPassword
+    });
+    successResponse(res, 200, result, 'Password changed');
+});

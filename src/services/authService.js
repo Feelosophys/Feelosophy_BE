@@ -1,5 +1,3 @@
-// src/services/authService.js
-// Handles user registration, login, password hashing, JWT
 const User = require('../models/User');
 const {
     hashPassword,
@@ -40,6 +38,10 @@ exports.register = async ({
     };
 };
 
+const RefreshToken = require('../models/RefreshToken');
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwtAuthConfig');
+
 exports.login = async ({
     email,
     password
@@ -50,10 +52,20 @@ exports.login = async ({
     if (!user || !(await comparePassword(password, user.password))) {
         throw new AppError('Invalid credentials', 401);
     }
-    const token = generateToken({
+
+    const accessToken = jwtConfig.generateToken({
         id: user._id,
         role: user.role
     });
+
+    const refreshToken = jwtConfig.generateRefreshToken(user._id);
+
+    await RefreshToken.create({
+        userId: user._id,
+        token: refreshToken,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    });
+
     return {
         user: {
             id: user._id,
@@ -61,6 +73,47 @@ exports.login = async ({
             email: user.email,
             role: user.role
         },
-        token
+        accessToken,
+        refreshToken
+    };
+};
+
+exports.refreshToken = async (refreshToken) => {
+    const found = await RefreshToken.findOne({
+        token: refreshToken
+    });
+    if (!found || found.expiresAt < new Date()) {
+        throw new AppError('Refresh token invalid or expired', 401);
+    }
+
+    const payload = jwtConfig.verifyToken(refreshToken);
+
+    const user = await User.findById(payload.id);
+    if (!user) throw new AppError('User not found', 404);
+
+    const accessToken = jwtConfig.generateToken({
+        id: user._id,
+        role: user.role
+    });
+
+    return {
+        accessToken
+    };
+};
+
+exports.changePassword = async ({
+    userId,
+    oldPassword,
+    newPassword
+}) => {
+    const user = await User.findById(userId).select('+password');
+    if (!user) throw new AppError('User not found', 404);
+    if (!(await comparePassword(oldPassword, user.password))) {
+        throw new AppError('Old password is incorrect', 400);
+    }
+    user.password = await hashPassword(newPassword);
+    await user.save();
+    return {
+        message: 'Password changed successfully'
     };
 };

@@ -22,15 +22,16 @@ async function seedBlogs() {
         return;
     }
 
-    const blogs = [{
-            title: '10 Signs You Might Need Mental Health Support',
-            slug: '10-signs-mental-health-support',
-            coverImage: 'https://example.com/images/mental-health-signs.jpg',
-            content: 'Mental health is just as important as physical health. Here are 10 key signs that indicate you might benefit from professional mental health support...',
-            tags: ['mental health', 'awareness', 'support'],
-            isPublished: true,
-            views: 150
-        },
+    const blogs = [
+        // {
+        //     title: '10 Signs You Might Need Mental Health Support',
+        //     slug: '10-signs-mental-health-support',
+        //     coverImage: 'https://example.com/images/mental-health-signs.jpg',
+        //     content: 'Mental health is just as important as physical health. Here are 10 key signs that indicate you might benefit from professional mental health support...',
+        //     tags: ['mental health', 'awareness', 'support'],
+        //     isPublished: true,
+        //     views: 150
+        // },
         {
             title: 'Understanding Anxiety: Types, Symptoms, and Coping Strategies',
             slug: 'understanding-anxiety-types-symptoms-coping',
