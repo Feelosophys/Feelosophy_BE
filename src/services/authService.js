@@ -25,14 +25,14 @@ exports.register = async ({
     });
     const token = generateToken({
         id: user._id,
-        role: user.role
+        roles: user.roles
     });
     return {
         user: {
             id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            roles: user.roles
         },
         token
     };
@@ -55,7 +55,7 @@ exports.login = async ({
 
     const accessToken = jwtConfig.generateToken({
         id: user._id,
-        role: user.role
+        roles: user.roles
     });
 
     const refreshToken = jwtConfig.generateRefreshToken(user._id);
@@ -71,7 +71,7 @@ exports.login = async ({
             id: user._id,
             name: user.name,
             email: user.email,
-            role: user.role
+            roles: user.roles
         },
         accessToken,
         refreshToken
@@ -93,7 +93,7 @@ exports.refreshToken = async (refreshToken) => {
 
     const accessToken = jwtConfig.generateToken({
         id: user._id,
-        role: user.role
+        roles: user.roles
     });
 
     return {

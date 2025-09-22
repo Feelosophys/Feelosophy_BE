@@ -32,6 +32,13 @@ async function seedUsers() {
             bio: 'Mental health consultation teacher'
         },
         {
+            name: 'Dr. Emily Davis',
+            email: 'emily.davis@example.com',
+            password: 'teacher456',
+            roles: ['teacher'],
+            bio: 'Experienced mental health teacher and counselor'
+        },
+        {
             name: 'Wellness Corp',
             email: 'org@wellnesscorp.com',
             password: 'org123',

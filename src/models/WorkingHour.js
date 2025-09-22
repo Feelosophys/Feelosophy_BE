@@ -22,6 +22,10 @@ const workingHourSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  note: {
+    type: String,
+    require: false
+  },
 }, {
   timestamps: true
 });

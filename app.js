@@ -15,8 +15,10 @@ const errorHandler = require('./src/middlewares/errorHandler');
 const authRoutes = require('./src/routes/authRoutes');
 const blogRoutes = require('./src/routes/blogRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const workingHourRoutes = require('./src/routes/workingHourRoutes');
+const teacherRoutes = require('./src/routes/teacherRoutes');
+const appointmentRoutes = require('./src/routes/appointmentRoutes');
 // const courseRoutes = require('./src/routes/courseRoutes');
-// const appointmentRoutes = require('./src/routes/appointmentRoutes');
 
 const app = express();
 
@@ -32,8 +34,10 @@ app.use(morgan('dev'));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/blogs', blogRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/working-hours', workingHourRoutes);
+app.use('/api/v1/teachers', teacherRoutes);
+app.use('/api/v1/appointments', appointmentRoutes);
 // app.use('/api/v1/courses', courseRoutes);
-// app.use('/api/v1/appointments', appointmentRoutes);
 
 // Swagger docs
 setupSwagger(app);
