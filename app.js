@@ -20,6 +20,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const workingHourRoutes = require('./src/routes/workingHourRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes');
 const appointmentRoutes = require('./src/routes/appointmentRoutes');
+const forumRoutes = require('./src/routes/forumRoutes');
 // const courseRoutes = require('./src/routes/courseRoutes');
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/working-hours', workingHourRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/appointments', appointmentRoutes);
+app.use('/api/v1/forum', forumRoutes);
 // app.use('/api/v1/courses', courseRoutes);
 
 // Swagger docs

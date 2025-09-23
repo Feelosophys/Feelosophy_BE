@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const commentSchema = new mongoose.Schema({
   postId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post',
+    required: true
+  },
+  postType: {
+    type: String,
+    enum: ['post', 'forum'],
     required: true
   },
   userId: {
@@ -17,6 +21,16 @@ const commentSchema = new mongoose.Schema({
   },
 }, {
   timestamps: true
+});
+
+// Virtual for dynamic ref
+commentSchema.virtual('post', {
+  ref: function () {
+    return this.postType === 'forum' ? 'Forum' : 'Post';
+  },
+  localField: 'postId',
+  foreignField: '_id',
+  justOne: true
 });
 
 module.exports = mongoose.model('Comment', commentSchema);

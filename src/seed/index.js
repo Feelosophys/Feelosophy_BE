@@ -37,6 +37,7 @@ const {
 const {
     seedBlogs
 } = require('./blogSeeder');
+const seedForum = require('./forumSeeder');
 
 async function runAllSeeders() {
     try {
@@ -79,6 +80,9 @@ async function runAllSeeders() {
 
         console.log('\n📰 Seeding Blogs...');
         await seedBlogs();
+
+        console.log('\n💬 Seeding Forum...');
+        await seedForum();
 
         console.log('\n✅ Database seeding completed successfully!');
         console.log('🎉 You can now start your application');
