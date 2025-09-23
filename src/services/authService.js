@@ -117,3 +117,11 @@ exports.changePassword = async ({
         message: 'Password changed successfully'
     };
 };
+
+exports.generateTokenForUser = async (user) => {
+    const token = generateToken({
+        id: user._id,
+        roles: user.roles
+    });
+    return token;
+};

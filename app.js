@@ -2,6 +2,8 @@
 // Configures Express app, middlewares, routers, Swagger, error handler
 const express = require('express');
 const morgan = require('morgan');
+const session = require('express-session');
+const passport = require('./src/config/passportConfig');
 const {
     corsMiddleware,
     helmetMiddleware
@@ -29,6 +31,17 @@ app.use(express.urlencoded({
     extended: true
 }));
 app.use(morgan('dev'));
+
+// Session middleware for Passport
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Mount API routers
 app.use('/api/v1/auth', authRoutes);

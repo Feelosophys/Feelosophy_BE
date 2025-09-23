@@ -121,3 +121,20 @@ exports.changePassword = catchAsync(async (req, res) => {
     });
     successResponse(res, 200, result, 'Password changed');
 });
+
+/**
+ * @swagger
+ * /api/v1/auth/google/callback:
+ *   get:
+ *     summary: Google OAuth callback
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Google login successful
+ */
+exports.googleAuthCallback = catchAsync(async (req, res) => {
+    const user = req.user;
+    const token = await authService.generateTokenForUser(user);
+    // Redirect to frontend with token, or send JSON
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+});
