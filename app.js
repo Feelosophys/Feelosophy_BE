@@ -2,6 +2,8 @@
 // Configures Express app, middlewares, routers, Swagger, error handler
 const express = require('express');
 const morgan = require('morgan');
+const session = require('express-session');
+const passport = require('./src/config/passportConfig');
 const {
     corsMiddleware,
     helmetMiddleware
@@ -18,6 +20,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const workingHourRoutes = require('./src/routes/workingHourRoutes');
 const teacherRoutes = require('./src/routes/teacherRoutes');
 const appointmentRoutes = require('./src/routes/appointmentRoutes');
+const forumRoutes = require('./src/routes/forumRoutes');
 // const courseRoutes = require('./src/routes/courseRoutes');
 
 const app = express();
@@ -30,6 +33,17 @@ app.use(express.urlencoded({
 }));
 app.use(morgan('dev'));
 
+// Session middleware for Passport
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Mount API routers
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/blogs', blogRoutes);
@@ -37,6 +51,7 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/working-hours', workingHourRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/appointments', appointmentRoutes);
+app.use('/api/v1/forum', forumRoutes);
 // app.use('/api/v1/courses', courseRoutes);
 
 // Swagger docs
