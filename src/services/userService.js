@@ -62,6 +62,72 @@ class UserService {
             throw new CustomError('Error fetching user', 500);
         }
     }
+
+    async updateUserProfile(userId, updateData) {
+        try {
+            // Validate user exists
+            const user = await User.findById(userId);
+            if (!user) {
+                throw new CustomError('User not found', 404);
+            }
+
+            // Update only allowed fields
+            const allowedFields = ['name', 'bio', 'avatar'];
+            const filteredData = {};
+            
+            allowedFields.forEach(field => {
+                if (updateData[field] !== undefined) {
+                    filteredData[field] = updateData[field];
+                }
+            });
+
+            // Check if there's actually data to update
+            if (Object.keys(filteredData).length === 0) {
+                throw new CustomError('No valid fields to update', 400);
+            }
+
+            const updatedUser = await User.findByIdAndUpdate(
+                userId, 
+                filteredData, 
+                { new: true, runValidators: true }
+            ).lean();
+
+            // Remove sensitive data
+            delete updatedUser.password;
+            delete updatedUser.googleId;
+
+            return updatedUser;
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError('Error updating user profile', 500);
+        }
+    }
+
+    async getCurrentUserProfile(userId) {
+        try {
+            const user = await User.findById(userId)
+                .populate('wallet', 'balance')
+                .populate('organization', 'name')
+                .lean();
+            
+            if (!user) {
+                throw new CustomError('User not found', 404);
+            }
+
+            // Remove sensitive data
+            delete user.password;
+            delete user.googleId;
+
+            return user;
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError('Error fetching user profile', 500);
+        }
+    }
 }
 
 module.exports = new UserService();
