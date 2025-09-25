@@ -1,6 +1,9 @@
 // src/routes/userRoutes.js
 const express = require('express');
 const userController = require('../controllers/userController');
+const authMiddleware = require('../middlewares/authMiddleware');
+const { updateProfileValidationRules } = require('../validators/userValidators');
+const validationResultHandler = require('../middlewares/validationResultHandler');
 
 const router = express.Router();
 
@@ -120,6 +123,99 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
+
+/**
+ * @swagger
+ * /api/v1/users/profile:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/users/profile:
+ *   put:
+ *     summary: Update current user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 50
+ *                 description: User name
+ *               bio:
+ *                 type: string
+ *                 maxLength: 500
+ *                 description: User bio
+ *               avatar:
+ *                 type: string
+ *                 format: url
+ *                 description: Avatar URL
+ *             example:
+ *               name: "John Doe"
+ *               bio: "I am a psychology enthusiast"
+ *               avatar: "https://example.com/avatar.jpg"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+
+// GET /api/v1/users/profile - Must be before /:id route
+router.get('/profile', authMiddleware, userController.getCurrentUserProfile);
+
+// PUT /api/v1/users/profile
+router.put('/profile', 
+    authMiddleware, 
+    updateProfileValidationRules, 
+    validationResultHandler, 
+    userController.updateProfile
+);
 
 // GET /api/v1/users
 router.get('/', userController.getAllUsers);

@@ -30,6 +30,33 @@ class UserController {
         const user = await userService.getUserById(id);
         return ApiResponse.successResponse(res, 200, user, 'User retrieved successfully');
     });
+
+    // GET /api/v1/users/profile - Get current user profile
+    getCurrentUserProfile = catchAsync(async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return ApiResponse.errorResponse(res, 400, 'Validation failed', errors.array());
+        }
+
+        const userId = req.user.id; // From JWT token
+        const user = await userService.getCurrentUserProfile(userId);
+        
+        return ApiResponse.successResponse(res, 200, user, 'Current user profile retrieved successfully');
+    });
+
+    // PUT /api/v1/users/profile - Update current user profile
+    updateProfile = catchAsync(async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return ApiResponse.errorResponse(res, 400, 'Validation failed', errors.array());
+        }
+
+        const userId = req.user.id; // From JWT token
+        const updateData = req.body;
+
+        const updatedUser = await userService.updateUserProfile(userId, updateData);
+        return ApiResponse.successResponse(res, 200, updatedUser, 'Profile updated successfully');
+    });
 }
 
 module.exports = new UserController();
