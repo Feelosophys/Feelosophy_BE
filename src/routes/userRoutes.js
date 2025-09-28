@@ -2,7 +2,9 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authMiddleware = require('../middlewares/authMiddleware');
-const { updateProfileValidationRules } = require('../validators/userValidators');
+const {
+    updateProfileValidationRules
+} = require('../validators/userValidators');
 const validationResultHandler = require('../middlewares/validationResultHandler');
 
 const router = express.Router();
@@ -210,15 +212,18 @@ const router = express.Router();
 router.get('/profile', authMiddleware, userController.getCurrentUserProfile);
 
 // PUT /api/v1/users/profile
-router.put('/profile', 
-    authMiddleware, 
-    updateProfileValidationRules, 
-    validationResultHandler, 
+router.put('/profile',
+    authMiddleware,
+    updateProfileValidationRules,
+    validationResultHandler,
     userController.updateProfile
 );
 
 // GET /api/v1/users
 router.get('/', userController.getAllUsers);
+
+// GET /api/v1/users/:userId/courses
+router.get('/:userId/courses', userController.getUserCourses);
 
 // GET /api/v1/users/:id
 router.get('/:id', userController.getUserById);

@@ -10,14 +10,16 @@ class CourseService {
         try {
             const {
                 page = 1,
-                limit = 10,
-                status = 'all',
-                sortBy = 'enrolledAt', 
-                sortOrder = 'desc'
+                    limit = 10,
+                    status = 'all',
+                    sortBy = 'enrolledAt',
+                    sortOrder = 'desc'
             } = options;
 
             // Build query for UserCourse
-            const query = { userId };
+            const query = {
+                userId
+            };
             if (status !== 'all') {
                 query.status = status;
             }
@@ -36,8 +38,10 @@ class CourseService {
             // Sử dụng Aggregation Pipeline để join UserCourse với Course
             const pipeline = [
                 // Match user's enrollments
-                { $match: query },
-                
+                {
+                    $match: query
+                },
+
                 // Join với Course collection
                 {
                     $lookup: {
@@ -47,8 +51,10 @@ class CourseService {
                         as: 'course'
                     }
                 },
-                { $unwind: '$course' },
-                
+                {
+                    $unwind: '$course'
+                },
+
                 // Join với User collection để lấy instructor info
                 {
                     $lookup: {
@@ -58,8 +64,10 @@ class CourseService {
                         as: 'course.instructorInfo'
                     }
                 },
-                { $unwind: '$course.instructorInfo' },
-                
+                {
+                    $unwind: '$course.instructorInfo'
+                },
+
                 // Project chỉ những field cần thiết
                 {
                     $project: {
@@ -72,7 +80,12 @@ class CourseService {
                         'course.title': 1,
                         'course.description': 1,
                         'course.price': 1,
+                        'course.originalPrice': 1,
+                        'course.rating': 1,
                         'course.category': 1,
+                        'course.ageRange': 1,
+                        'course.courseType': 1,
+                        'course.totalHours': 1,
                         'course.isPublished': 1,
                         'course.lessons': 1,
                         'course.createdAt': 1,
@@ -81,13 +94,19 @@ class CourseService {
                         'course.instructorInfo.avatar': 1
                     }
                 },
-                
+
                 // Sort results
-                { $sort: sort },
-                
+                {
+                    $sort: sort
+                },
+
                 // Pagination
-                { $skip: skip },
-                { $limit: parseInt(limit) }
+                {
+                    $skip: skip
+                },
+                {
+                    $limit: parseInt(limit)
+                }
             ];
 
             const [enrollments, totalCount] = await Promise.all([
@@ -98,8 +117,9 @@ class CourseService {
             // Tính toán thêm thông tin cho mỗi course
             const enrichedCourses = enrollments.map(enrollment => ({
                 ...enrollment,
-                totalLessons: enrollment.course.lessons?.length || 0,
                 progressPercentage: 0, // TODO: Implement lesson progress tracking
+                totalLessons: enrollment.course.lessons ? .length || 0,
+
                 enrollmentDuration: Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24)) // days
             }));
 
@@ -144,16 +164,16 @@ class CourseService {
             }
 
             const course = enrollment.courseId;
-            const totalLessons = course.lessons?.length || 0;
-            
-            // TODO: Implement lesson completion tracking
-            // Hiện tại return mock data
-            const completedLessons = 0; 
+            totalLessons: enrollment.course.lessons ? .length || 0,
+
+                // TODO: Implement lesson completion tracking
+                // Hiện tại return mock data
+                const completedLessons = 0;
             const progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
-            
+
             // Tính thời gian học
             const enrollmentDuration = Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24));
-            
+
             return {
                 courseId: course._id,
                 courseTitle: course.title,
@@ -182,12 +202,17 @@ class CourseService {
 
     async getEnrollmentStats(userId) {
         try {
-            const stats = await UserCourse.aggregate([
-                { $match: { userId } },
+            const stats = await UserCourse.aggregate([{
+                    $match: {
+                        userId
+                    }
+                },
                 {
                     $group: {
                         _id: '$status',
-                        count: { $sum: 1 }
+                        count: {
+                            $sum: 1
+                        }
                     }
                 }
             ]);
@@ -213,13 +238,13 @@ class CourseService {
         try {
             const {
                 page = 1,
-                limit = 12,
-                search = '',
-                category = '',
-                minPrice = 0,
-                maxPrice = Number.MAX_SAFE_INTEGER,
-                sortBy = 'createdAt',
-                sortOrder = 'desc'
+                    limit = 12,
+                    search = '',
+                    category = '',
+                    minPrice = 0,
+                    maxPrice = Number.MAX_SAFE_INTEGER,
+                    sortBy = 'createdAt',
+                    sortOrder = 'desc'
             } = options;
 
             // Build query object - chỉ courses đã publish
@@ -229,15 +254,27 @@ class CourseService {
 
             // Text search trong title và description
             if (search) {
-                query.$or = [
-                    { title: { $regex: search, $options: 'i' } },
-                    { description: { $regex: search, $options: 'i' } }
+                query.$or = [{
+                        title: {
+                            $regex: search,
+                            $options: 'i'
+                        }
+                    },
+                    {
+                        description: {
+                            $regex: search,
+                            $options: 'i'
+                        }
+                    }
                 ];
             }
 
             // Filter theo category
             if (category) {
-                query.category = { $regex: category, $options: 'i' };
+                query.category = {
+                    $regex: category,
+                    $options: 'i'
+                };
             }
 
             // Filter theo price range
@@ -259,17 +296,22 @@ class CourseService {
             const skip = (page - 1) * limit;
 
             // Aggregation pipeline
-            const pipeline = [
-                { $match: query },
-                
+            const pipeline = [{
+                    $match: query
+                },
+
                 // Add computed fields
                 {
                     $addFields: {
-                        enrolledUsersCount: { $size: '$enrolledUsers' },
-                        lessonsCount: { $size: '$lessons' }
+                        enrolledUsersCount: {
+                            $size: '$enrolledUsers'
+                        },
+                        lessonsCount: {
+                            $size: '$lessons'
+                        }
                     }
                 },
-                
+
                 // Lookup instructor info
                 {
                     $lookup: {
@@ -279,31 +321,44 @@ class CourseService {
                         as: 'instructorInfo'
                     }
                 },
-                { $unwind: '$instructorInfo' },
-                
+                {
+                    $unwind: '$instructorInfo'
+                },
+
                 // Project only needed fields
                 {
                     $project: {
                         title: 1,
                         description: 1,
                         price: 1,
+                        originalPrice: 1,
+                        rating: 1,
+                        students: '$enrolledUsersCount',
+                        instructor: '$instructorInfo.name',
+                        instructorImage: '$instructorInfo.avatar',
                         category: 1,
-                        createdAt: 1,
-                        updatedAt: 1,
-                        lessonsCount: 1,
-                        enrolledUsersCount: 1,
-                        'instructorInfo.name': 1,
-                        'instructorInfo._id': 1,
-                        'instructorInfo.avatar': 1
+                        ageRange: 1,
+                        courseDuration: 1,
+                        courseType: 1,
+                        totalHours: 1,
+                        lessons: '$lessonsCount',
+                        features: 1,
+                        createdAt: 1
                     }
                 },
-                
+
                 // Sort results
-                { $sort: sort },
-                
+                {
+                    $sort: sort
+                },
+
                 // Pagination
-                { $skip: skip },
-                { $limit: parseInt(limit) }
+                {
+                    $skip: skip
+                },
+                {
+                    $limit: parseInt(limit)
+                }
             ];
 
             const [courses, totalCount, categories] = await Promise.all([
@@ -342,11 +397,11 @@ class CourseService {
     async getCourseById(courseId) {
         try {
             console.log('🔍 Fetching course with ID:', courseId);
-            
+
             // Step 1: Get basic course data first
             const basicCourse = await Course.findById(courseId);
             console.log('📋 Basic course found:', basicCourse ? 'Yes' : 'No');
-            
+
             if (!basicCourse) {
                 throw new CustomError('Course not found', 404);
             }
@@ -361,7 +416,7 @@ class CourseService {
             let instructor = null;
             try {
                 if (basicCourse.instructor) {
-                    const instructorResult = await User.findById(basicCourse.instructor).select('name email avatar bio');
+                    const instructorResult = await User.findById(basicCourse.instructor).select('name email avatar bio').lean();
                     instructor = instructorResult;
                     console.log('👨‍🏫 Instructor populated:', instructor ? 'Yes' : 'No');
                 } else {
@@ -380,7 +435,9 @@ class CourseService {
                     totalLessons = basicCourse.lessons.length;
                     console.log('📚 Total lessons count:', totalLessons);
                     // Don't populate lessons to avoid reference errors
-                    lessons = basicCourse.lessons.map(lessonId => ({ _id: lessonId }));
+                    lessons = basicCourse.lessons.map(lessonId => ({
+                        _id: lessonId
+                    }));
                 }
             } catch (lessonsError) {
                 console.log('❌ Lessons handling failed:', lessonsError.message);
@@ -392,8 +449,8 @@ class CourseService {
             const stats = {
                 totalEnrollments: basicCourse.enrolledUsers ? basicCourse.enrolledUsers.length : 0,
                 totalLessons: totalLessons,
-                createdAt: basicCourse.createdAt,
-                lastUpdated: basicCourse.updatedAt
+                createdAt: basicCourse.createdAt || new Date(),
+                lastUpdated: basicCourse.updatedAt || new Date()
             };
 
             // Step 5: Build safe response
@@ -407,8 +464,8 @@ class CourseService {
                 instructor: instructor,
                 lessons: lessons,
                 stats,
-                createdAt: basicCourse.createdAt,
-                updatedAt: basicCourse.updatedAt
+                createdAt: basicCourse.createdAt || new Date(),
+                updatedAt: basicCourse.updatedAt || new Date()
             };
 
             console.log('✅ Course details prepared successfully');
@@ -425,11 +482,15 @@ class CourseService {
 
     async getAvailableCategories() {
         try {
-            const categories = await Course.distinct('category', { 
+            const categories = await Course.distinct('category', {
                 isPublished: true,
-                category: { $exists: true, $ne: null, $ne: '' }
+                category: {
+                    $exists: true,
+                    $ne: null,
+                    $ne: ''
+                }
             });
-            
+
             return categories.filter(cat => cat && cat.trim() !== '').sort();
         } catch (error) {
             return [];
@@ -438,28 +499,49 @@ class CourseService {
 
     async getCourseStats() {
         try {
-            const stats = await Course.aggregate([
-                { $match: { isPublished: true } },
+            const stats = await Course.aggregate([{
+                    $match: {
+                        isPublished: true
+                    }
+                },
                 {
                     $group: {
                         _id: null,
-                        totalCourses: { $sum: 1 },
-                        averagePrice: { $avg: '$price' },
-                        totalEnrollments: { $sum: { $size: '$enrolledUsers' } },
-                        categories: { $addToSet: '$category' }
+                        totalCourses: {
+                            $sum: 1
+                        },
+                        averagePrice: {
+                            $avg: '$price'
+                        },
+                        totalEnrollments: {
+                            $sum: {
+                                $size: '$enrolledUsers'
+                            }
+                        },
+                        categories: {
+                            $addToSet: '$category'
+                        }
                     }
                 },
                 {
                     $project: {
                         _id: 0,
                         totalCourses: 1,
-                        averagePrice: { $round: ['$averagePrice', 2] },
+                        averagePrice: {
+                            $round: ['$averagePrice', 2]
+                        },
                         totalEnrollments: 1,
-                        totalCategories: { 
+                        totalCategories: {
                             $size: {
                                 $filter: {
                                     input: '$categories',
-                                    cond: { $and: [{ $ne: ['$$this', null] }, { $ne: ['$$this', ''] }] }
+                                    cond: {
+                                        $and: [{
+                                            $ne: ['$$this', null]
+                                        }, {
+                                            $ne: ['$$this', '']
+                                        }]
+                                    }
                                 }
                             }
                         }
@@ -475,6 +557,299 @@ class CourseService {
             };
         } catch (error) {
             throw new CustomError('Error fetching course statistics', 500);
+        }
+    }
+
+    async getCoursesByType(courseType, options = {}) {
+        try {
+            const {
+                page = 1,
+                    limit = 12,
+                    ageRange = '',
+                    category = '',
+                    sortBy = 'rating',
+                    sortOrder = 'desc'
+            } = options;
+
+            const query = {
+                isPublished: true,
+                courseType: courseType
+            };
+
+            if (ageRange) {
+                query.ageRange = ageRange;
+            }
+
+            if (category) {
+                query.category = {
+                    $regex: category,
+                    $options: 'i'
+                };
+            }
+
+            const sort = {};
+            sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+            const skip = (page - 1) * limit;
+
+            const pipeline = [{
+                    $match: query
+                },
+                {
+                    $addFields: {
+                        enrolledUsersCount: {
+                            $size: '$enrolledUsers'
+                        },
+                        lessonsCount: {
+                            $size: '$lessons'
+                        },
+                        reviewsCount: {
+                            $size: '$reviews'
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'instructor',
+                        foreignField: '_id',
+                        as: 'instructorInfo'
+                    }
+                },
+                {
+                    $unwind: '$instructorInfo'
+                },
+                {
+                    $project: {
+                        title: 1,
+                        description: 1,
+                        price: 1,
+                        originalPrice: 1,
+                        rating: 1,
+                        students: '$enrolledUsersCount',
+                        instructor: '$instructorInfo.name',
+                        instructorImage: '$instructorInfo.avatar',
+                        category: 1,
+                        ageRange: 1,
+                        courseDuration: 1,
+                        courseType: 1,
+                        totalHours: 1,
+                        lessons: '$lessonsCount',
+                        features: 1,
+                        corporateFeatures: {
+                            $cond: {
+                                if: {
+                                    $eq: ['$courseType', 'corporate']
+                                },
+                                then: '$corporateFeatures',
+                                else: []
+                            }
+                        },
+                        createdAt: 1
+                    }
+                },
+                {
+                    $sort: sort
+                },
+                {
+                    $skip: skip
+                },
+                {
+                    $limit: parseInt(limit)
+                }
+            ];
+
+            const [courses, totalCount] = await Promise.all([
+                Course.aggregate(pipeline),
+                Course.countDocuments(query)
+            ]);
+
+            return {
+                courses,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(totalCount / limit),
+                    totalCount,
+                    hasNextPage: page < Math.ceil(totalCount / limit),
+                    hasPrevPage: page > 1,
+                    limit: parseInt(limit)
+                }
+            };
+        } catch (error) {
+            throw new CustomError('Error fetching courses by type', 500);
+        }
+    }
+
+    async getTopRatedCourses(limit = 10) {
+        try {
+            const pipeline = [{
+                    $match: {
+                        isPublished: true,
+                        rating: {
+                            $gt: 0
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        enrolledUsersCount: {
+                            $size: '$enrolledUsers'
+                        },
+                        lessonsCount: {
+                            $size: '$lessons'
+                        }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'instructor',
+                        foreignField: '_id',
+                        as: 'instructorInfo'
+                    }
+                },
+                {
+                    $unwind: '$instructorInfo'
+                },
+                {
+                    $project: {
+                        title: 1,
+                        description: 1,
+                        price: 1,
+                        rating: 1,
+                        students: '$enrolledUsersCount',
+                        instructor: '$instructorInfo.name',
+                        instructorImage: '$instructorInfo.avatar',
+                        category: 1,
+                        ageRange: 1,
+                        courseDuration: 1,
+                        courseType: 1,
+                        totalHours: 1,
+                        lessons: '$lessonsCount',
+                        features: 1
+                    }
+                },
+                {
+                    $sort: {
+                        rating: -1,
+                        students: -1
+                    }
+                },
+                {
+                    $limit: parseInt(limit)
+                }
+            ];
+
+            const courses = await Course.aggregate(pipeline);
+            return courses;
+        } catch (error) {
+            throw new CustomError('Error fetching top rated courses', 500);
+        }
+    }
+
+    async getUserCourses(userId, options = {}) {
+        try {
+            const {
+                page = 1,
+                    limit = 10,
+                    status = 'completed'
+            } = options;
+
+            // Build query for UserCourse
+            const query = {
+                userId,
+                status
+            };
+
+            const skip = (page - 1) * limit;
+
+            // Sử dụng Aggregation Pipeline để join UserCourse với Course
+            const pipeline = [
+                // Match user's enrollments
+                {
+                    $match: query
+                },
+
+                // Join với Course collection
+                {
+                    $lookup: {
+                        from: 'courses',
+                        localField: 'courseId',
+                        foreignField: '_id',
+                        as: 'course'
+                    }
+                },
+                {
+                    $unwind: '$course'
+                },
+
+                // Join với User collection để lấy instructor info
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'course.instructor',
+                        foreignField: '_id',
+                        as: 'course.instructorInfo'
+                    }
+                },
+                {
+                    $unwind: '$course.instructorInfo'
+                },
+
+                // Project chỉ những field cần thiết
+                {
+                    $project: {
+                        _id: 1,
+                        enrolledAt: 1,
+                        status: 1,
+                        'course._id': 1,
+                        'course.title': 1,
+                        'course.description': 1,
+                        'course.price': 1,
+                        'course.category': 1,
+                        'course.ageRange': 1,
+                        'course.courseType': 1,
+                        'course.rating': 1,
+                        'course.totalHours': 1,
+                        'course.instructorInfo.name': 1,
+                        'course.instructorInfo.avatar': 1
+                    }
+                },
+
+                // Sort by enrollment date
+                {
+                    $sort: {
+                        enrolledAt: -1
+                    }
+                },
+
+                // Pagination
+                {
+                    $skip: skip
+                },
+                {
+                    $limit: parseInt(limit)
+                }
+            ];
+
+            const [enrollments, totalCount] = await Promise.all([
+                UserCourse.aggregate(pipeline),
+                UserCourse.countDocuments(query)
+            ]);
+
+            return {
+                courses: enrollments,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(totalCount / limit),
+                    totalCount,
+                    hasNextPage: page < Math.ceil(totalCount / limit),
+                    hasPrevPage: page > 1,
+                    limit: parseInt(limit)
+                }
+            };
+        } catch (error) {
+            throw new CustomError('Error fetching user courses', 500);
         }
     }
 }

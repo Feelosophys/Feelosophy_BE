@@ -32,6 +32,70 @@ async function seedWallets() {
         {
             balance: 0,
             transactions: []
+        },
+        {
+            balance: 2500,
+            transactions: [{
+                    amount: 2000,
+                    type: 'credit',
+                    reason: 'Company reimbursement',
+                    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    amount: 500,
+                    type: 'debit',
+                    reason: 'Course purchase',
+                    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+                }
+            ]
+        },
+        {
+            balance: 750,
+            transactions: [{
+                    amount: 1000,
+                    type: 'credit',
+                    reason: 'Gift card',
+                    date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    amount: 250,
+                    type: 'debit',
+                    reason: 'Workshop registration',
+                    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+                }
+            ]
+        },
+        {
+            balance: 150,
+            transactions: [{
+                    amount: 300,
+                    type: 'credit',
+                    reason: 'Referral bonus',
+                    date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    amount: 150,
+                    type: 'debit',
+                    reason: 'Book purchase',
+                    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+                }
+            ]
+        },
+        {
+            balance: 3200,
+            transactions: [{
+                    amount: 3000,
+                    type: 'credit',
+                    reason: 'Corporate wellness program',
+                    date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                },
+                {
+                    amount: 200,
+                    type: 'debit',
+                    reason: 'Consultation fee',
+                    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+                }
+            ]
         }
     ];
 

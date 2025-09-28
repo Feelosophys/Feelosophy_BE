@@ -5,7 +5,15 @@ const User = require('../models/User');
 async function seedWorkingHours() {
     // Get teachers
     const teachers = await User.find({
-        roles: 'teacher'
+        $or: [{
+                role: 'teacher'
+            },
+            {
+                roles: {
+                    $in: ['teacher']
+                }
+            }
+        ]
     });
 
     if (teachers.length === 0) {
@@ -39,6 +47,13 @@ async function seedWorkingHours() {
             isBooked: false
         });
 
+        workingHours.push({
+            date: date,
+            startTime: '11:00',
+            endTime: '12:00',
+            isBooked: false
+        });
+
         // Afternoon slots
         workingHours.push({
             date: date,
@@ -51,6 +66,28 @@ async function seedWorkingHours() {
             date: date,
             startTime: '15:00',
             endTime: '16:00',
+            isBooked: false
+        });
+
+        workingHours.push({
+            date: date,
+            startTime: '16:00',
+            endTime: '17:00',
+            isBooked: false
+        });
+
+        // Evening slots
+        workingHours.push({
+            date: date,
+            startTime: '18:00',
+            endTime: '19:00',
+            isBooked: false
+        });
+
+        workingHours.push({
+            date: date,
+            startTime: '19:00',
+            endTime: '20:00',
             isBooked: false
         });
     }

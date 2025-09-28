@@ -2,11 +2,12 @@
 const express = require('express');
 const courseController = require('../controllers/courseController');
 const authMiddleware = require('../middlewares/authMiddleware');
-const { 
-    getMyCoursesValidationRules, 
+const {
+    getMyCoursesValidationRules,
     getCourseProgressValidationRules,
     getAllCoursesValidationRules,
-    getCourseByIdValidationRules
+    getCourseByIdValidationRules,
+    getCoursesByTypeValidationRules
 } = require('../validators/courseValidators');
 const validationResultHandler = require('../middlewares/validationResultHandler');
 
@@ -310,8 +311,18 @@ router.get('/stats', courseController.getAllCoursesStats);
 // GET /api/v1/courses/categories
 router.get('/categories', courseController.getAvailableCategories);
 
+// GET /api/v1/courses/top-rated
+router.get('/top-rated', courseController.getTopRatedCourses);
+
+// GET /api/v1/courses/type/:courseType
+router.get('/type/:courseType',
+    getCoursesByTypeValidationRules,
+    validationResultHandler,
+    courseController.getCoursesByType
+);
+
 // GET /api/v1/courses
-router.get('/', 
+router.get('/',
     getAllCoursesValidationRules,
     validationResultHandler,
     courseController.getAllCourses
@@ -321,14 +332,14 @@ router.get('/',
 // Mount protected routes BEFORE /:courseId to avoid conflicts
 router.get('/enrollment-stats', authMiddleware, courseController.getEnrollmentStats);
 
-router.get('/my-courses', 
+router.get('/my-courses',
     authMiddleware,
     getMyCoursesValidationRules,
     validationResultHandler,
     courseController.getMyCourses
 );
 
-router.get('/:courseId/progress', 
+router.get('/:courseId/progress',
     authMiddleware,
     getCourseProgressValidationRules,
     validationResultHandler,
@@ -339,7 +350,7 @@ router.get('/:courseId/progress',
 
 // GET /api/v1/courses/:courseId - Must be AFTER all specific routes
 router.get('/:courseId',
-    getCourseByIdValidationRules, 
+    getCourseByIdValidationRules,
     validationResultHandler,
     courseController.getCourseDetails
 );

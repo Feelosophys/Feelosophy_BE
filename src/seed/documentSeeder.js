@@ -34,6 +34,62 @@ async function seedDocuments() {
         {
             name: 'Meditation Progress Tracker.pdf',
             fileUrl: 'https://example.com/documents/meditation-tracker.pdf'
+        },
+        {
+            name: 'Depression Symptom Checklist.pdf',
+            fileUrl: 'https://example.com/documents/depression-checklist.pdf'
+        },
+        {
+            name: 'CBT Thought Record.pdf',
+            fileUrl: 'https://example.com/documents/cbt-thought-record.pdf'
+        },
+        {
+            name: 'Emotional Resilience Workbook.pdf',
+            fileUrl: 'https://example.com/documents/resilience-workbook.pdf'
+        },
+        {
+            name: 'Stress Management Plan.pdf',
+            fileUrl: 'https://example.com/documents/stress-management-plan.pdf'
+        },
+        {
+            name: 'Sleep Diary Template.pdf',
+            fileUrl: 'https://example.com/documents/sleep-diary.pdf'
+        },
+        {
+            name: 'Nutrition for Mental Health Guide.pdf',
+            fileUrl: 'https://example.com/documents/nutrition-guide.pdf'
+        },
+        {
+            name: 'Digital Detox Checklist.pdf',
+            fileUrl: 'https://example.com/documents/digital-detox-checklist.pdf'
+        },
+        {
+            name: 'Workplace Wellness Plan.pdf',
+            fileUrl: 'https://example.com/documents/workplace-wellness.pdf'
+        },
+        {
+            name: 'Family Communication Guide.pdf',
+            fileUrl: 'https://example.com/documents/family-communication.pdf'
+        },
+        {
+            name: 'Trauma Recovery Resources.pdf',
+            fileUrl: 'https://example.com/documents/trauma-resources.pdf'
+        },
+        {
+            name: 'Addiction Support Directory.pdf',
+            fileUrl: 'https://example.com/documents/addiction-directory.pdf'
+        },
+        {
+            name: 'LGBTQ+ Mental Health Resources.pdf',
+            fileUrl: 'https://example.com/documents/lgbtq-resources.pdf'
+        },
+        {
+            name: 'Senior Mental Health Guide.pdf',
+            fileUrl: 'https://example.com/documents/senior-mental-health.pdf'
+        },
+        {
+            name: 'Children\'s Mental Health Handbook.pdf',
+            fileUrl: 'https://example.com/documents/children-handbook.pdf'
         }
     ];
 

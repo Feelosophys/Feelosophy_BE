@@ -6,12 +6,43 @@ const TeacherSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    bio: {
-        type: String
-    },
-    expertise: [{
-        type: String
+    specialization: [{
+        type: String,
+        trim: true
     }],
+    experience: {
+        type: String,
+        trim: true
+    },
+    rating: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 5
+    },
+    reviews: {
+        type: Number,
+        default: 0,
+        min: 0
+    },
+    price: {
+        type: Number,
+        min: 0
+    },
+    bio: {
+        type: String,
+        trim: true
+    },
+    availability: [{
+        type: String,
+        trim: true
+    }],
+    expertise: [{ // Keep for backward compatibility
+        type: String,
+        trim: true
+    }],
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('Teacher', TeacherSchema);

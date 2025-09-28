@@ -5,7 +5,7 @@ const User = require('../models/User');
 async function seedOrganizations() {
     // Get users with organization role
     const orgUsers = await User.find({
-        roles: 'organization'
+        role: 'admin'
     });
 
     if (orgUsers.length === 0) {
@@ -20,6 +20,46 @@ async function seedOrganizations() {
         },
         {
             name: 'Mental Health Alliance',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Corporate Wellness Solutions',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Healthcare Partners Inc',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'MindCare Group',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Wellbeing Enterprises',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Mental Wellness Institute',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Corporate Health Partners',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Employee Wellness Network',
+            members: [],
+            purchasedCourses: []
+        },
+        {
+            name: 'Healthcare Solutions LLC',
             members: [],
             purchasedCourses: []
         }

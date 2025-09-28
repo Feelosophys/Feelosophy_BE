@@ -40,6 +40,76 @@ async function seedVideos() {
             title: '5-Minute Guided Meditation',
             url: 'https://example.com/video6.mp4',
             duration: 300 // 5 minutes
+        },
+        {
+            title: 'Understanding Depression',
+            url: 'https://example.com/video7.mp4',
+            duration: 960 // 16 minutes
+        },
+        {
+            title: 'Cognitive Behavioral Therapy Basics',
+            url: 'https://example.com/video8.mp4',
+            duration: 1200 // 20 minutes
+        },
+        {
+            title: 'Building Emotional Strength',
+            url: 'https://example.com/video9.mp4',
+            duration: 780 // 13 minutes
+        },
+        {
+            title: 'Stress Reduction Techniques',
+            url: 'https://example.com/video10.mp4',
+            duration: 660 // 11 minutes
+        },
+        {
+            title: 'Sleep and Mental Wellness',
+            url: 'https://example.com/video11.mp4',
+            duration: 900 // 15 minutes
+        },
+        {
+            title: 'Brain-Healthy Nutrition',
+            url: 'https://example.com/video12.mp4',
+            duration: 1020 // 17 minutes
+        },
+        {
+            title: 'Digital Wellness Strategies',
+            url: 'https://example.com/video13.mp4',
+            duration: 720 // 12 minutes
+        },
+        {
+            title: 'Managing Workplace Stress',
+            url: 'https://example.com/video14.mp4',
+            duration: 840 // 14 minutes
+        },
+        {
+            title: 'Effective Family Communication',
+            url: 'https://example.com/video15.mp4',
+            duration: 960 // 16 minutes
+        },
+        {
+            title: 'Trauma Recovery Process',
+            url: 'https://example.com/video16.mp4',
+            duration: 1140 // 19 minutes
+        },
+        {
+            title: 'Addiction Recovery Journey',
+            url: 'https://example.com/video17.mp4',
+            duration: 1080 // 18 minutes
+        },
+        {
+            title: 'LGBTQ+ Mental Health Support',
+            url: 'https://example.com/video18.mp4',
+            duration: 900 // 15 minutes
+        },
+        {
+            title: 'Mental Health in Aging',
+            url: 'https://example.com/video19.mp4',
+            duration: 780 // 13 minutes
+        },
+        {
+            title: 'Supporting Young Minds',
+            url: 'https://example.com/video20.mp4',
+            duration: 660 // 11 minutes
         }
     ];
 

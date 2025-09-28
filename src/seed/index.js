@@ -35,9 +35,15 @@ const {
     seedWorkingHours
 } = require('./workingHourSeeder');
 const {
+    seedTeachers
+} = require('./teacherSeeder');
+const {
     seedBlogs
 } = require('./blogSeeder');
 const seedForum = require('./forumSeeder');
+const {
+    seedFeedback
+} = require('./feedbackSeeder');
 
 async function runAllSeeders() {
     try {
@@ -57,7 +63,10 @@ async function runAllSeeders() {
         console.log('\n👥 Seeding Users...');
         await seedUsers();
 
-        console.log('\n💰 Seeding Wallets...');
+        console.log('\n�‍🏫 Seeding Teachers...');
+        await seedTeachers();
+
+        console.log('\n�💰 Seeding Wallets...');
         await seedWallets();
 
         console.log('\n🏢 Seeding Organizations...');
@@ -83,6 +92,9 @@ async function runAllSeeders() {
 
         console.log('\n💬 Seeding Forum...');
         await seedForum();
+
+        console.log('\n⭐ Seeding Feedback...');
+        await seedFeedback();
 
         console.log('\n✅ Database seeding completed successfully!');
         console.log('🎉 You can now start your application');

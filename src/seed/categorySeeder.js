@@ -21,6 +21,46 @@ async function seedCategories() {
         {
             name: 'Mindfulness & Meditation',
             description: 'Practices for mindful living and meditation techniques'
+        },
+        {
+            name: 'Sleep & Wellness',
+            description: 'Sleep hygiene and its impact on mental health'
+        },
+        {
+            name: 'Workplace Mental Health',
+            description: 'Mental health support in professional environments'
+        },
+        {
+            name: 'Family & Relationships',
+            description: 'Mental health in family dynamics and relationships'
+        },
+        {
+            name: 'Nutrition & Mental Health',
+            description: 'The connection between diet and mental wellbeing'
+        },
+        {
+            name: 'Digital Wellness',
+            description: 'Managing technology use for better mental health'
+        },
+        {
+            name: 'Trauma Recovery',
+            description: 'Healing from traumatic experiences'
+        },
+        {
+            name: 'Addiction Support',
+            description: 'Resources for overcoming substance abuse and addiction'
+        },
+        {
+            name: 'LGBTQ+ Mental Health',
+            description: 'Mental health support for LGBTQ+ communities'
+        },
+        {
+            name: 'Senior Mental Health',
+            description: 'Mental health considerations for older adults'
+        },
+        {
+            name: 'Children & Teens',
+            description: 'Mental health support for young people'
         }
     ];
 

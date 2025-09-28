@@ -19,6 +19,60 @@ const forumData = [{
         content: 'I get really anxious when meeting new people. What techniques have worked for you?',
         tags: ['anxiety', 'social', 'tips'],
         status: 'open'
+    },
+    {
+        title: 'Sleep problems and mental health',
+        content: 'I\'ve been having trouble sleeping lately and it\'s affecting my mood. Any recommendations for improving sleep quality?',
+        tags: ['sleep', 'insomnia', 'mental-health'],
+        status: 'open'
+    },
+    {
+        title: 'Workplace burnout - how to recognize and prevent it',
+        content: 'I feel constantly exhausted at work. How can I tell if it\'s burnout and what can I do about it?',
+        tags: ['burnout', 'workplace', 'exhaustion'],
+        status: 'open'
+    },
+    {
+        title: 'Mindfulness apps - which ones do you recommend?',
+        content: 'I\'m looking for good mindfulness and meditation apps. What are your favorites and why?',
+        tags: ['mindfulness', 'apps', 'meditation'],
+        status: 'open'
+    },
+    {
+        title: 'Supporting a friend with depression',
+        content: 'My friend has been diagnosed with depression. How can I best support them without overstepping?',
+        tags: ['depression', 'support', 'friends'],
+        status: 'open'
+    },
+    {
+        title: 'Exercise and mental health benefits',
+        content: 'How does regular exercise affect mental health? What types of exercise work best?',
+        tags: ['exercise', 'mental-health', 'fitness'],
+        status: 'open'
+    },
+    {
+        title: 'Digital detox challenges and tips',
+        content: 'I\'m trying to reduce my screen time but it\'s harder than I thought. Any tips for successful digital detox?',
+        tags: ['digital-detox', 'screen-time', 'wellness'],
+        status: 'open'
+    },
+    {
+        title: 'Parenting with mental health challenges',
+        content: 'How do you balance parenting responsibilities when dealing with your own mental health issues?',
+        tags: ['parenting', 'mental-health', 'family'],
+        status: 'open'
+    },
+    {
+        title: 'Seasonal affective disorder (SAD)',
+        content: 'As winter approaches, I notice my mood getting worse. Could this be SAD? What helps?',
+        tags: ['SAD', 'seasonal', 'depression'],
+        status: 'open'
+    },
+    {
+        title: 'Building resilience after trauma',
+        content: 'I\'m working on recovery after a traumatic experience. What strategies have helped you build resilience?',
+        tags: ['trauma', 'resilience', 'recovery'],
+        status: 'open'
     }
 ];
 
