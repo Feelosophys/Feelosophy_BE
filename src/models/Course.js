@@ -52,7 +52,7 @@ const courseSchema = new mongoose.Schema({
   },
   ageRange: {
     type: String,
-    enum: ['children', 'teenagers', 'adults'],
+    enum: ['18-50', '13-19', '6-12'],
     required: true
   },
   topics: [{

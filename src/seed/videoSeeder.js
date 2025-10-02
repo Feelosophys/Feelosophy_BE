@@ -13,103 +13,103 @@ async function seedVideos() {
 
     const videosData = [{
             title: 'Mental Health Overview',
-            url: 'https://example.com/video1.mp4',
-            duration: 900 // 15 minutes in seconds
+            url: 'https://www.youtube.com/watch?v=oxx564hMBUI',
+            duration: 346
         },
         {
             title: 'Common Mental Health Myths',
-            url: 'https://example.com/video2.mp4',
-            duration: 720 // 12 minutes
+            url: 'https://www.youtube.com/watch?v=O6WGVe6Aebk',
+            duration: 667
         },
         {
             title: 'Identifying Anxiety Triggers',
-            url: 'https://example.com/video3.mp4',
-            duration: 1080 // 18 minutes
+            url: 'https://www.youtube.com/watch?v=ia61O6vfyEU',
+            duration: 230
         },
         {
             title: 'Box Breathing Technique',
-            url: 'https://example.com/video4.mp4',
-            duration: 600 // 10 minutes
+            url: 'https://www.youtube.com/watch?v=FJJazKtH_9I',
+            duration: 376
         },
         {
             title: 'Mindful Awareness Exercise',
-            url: 'https://example.com/video5.mp4',
-            duration: 840 // 14 minutes
+            url: 'https://www.youtube.com/watch?v=bLpChrgS0AY',
+            duration: 224
         },
         {
             title: '5-Minute Guided Meditation',
-            url: 'https://example.com/video6.mp4',
-            duration: 300 // 5 minutes
+            url: 'https://www.youtube.com/watch?v=j734gLbQFbU',
+            duration: 332
         },
         {
             title: 'Understanding Depression',
-            url: 'https://example.com/video7.mp4',
-            duration: 960 // 16 minutes
+            url: 'https://www.youtube.com/watch?v=z-IR48Mb3W0',
+            duration: 269
         },
         {
             title: 'Cognitive Behavioral Therapy Basics',
-            url: 'https://example.com/video8.mp4',
-            duration: 1200 // 20 minutes
+            url: 'https://www.youtube.com/watch?v=ZdyOwZ4_RnI',
+            duration: 295
         },
         {
             title: 'Building Emotional Strength',
-            url: 'https://example.com/video9.mp4',
-            duration: 780 // 13 minutes
+            url: 'https://www.youtube.com/watch?v=rxDjTyWRqDA',
+            duration: 287
         },
         {
             title: 'Stress Reduction Techniques',
-            url: 'https://example.com/video10.mp4',
-            duration: 660 // 11 minutes
+            url: 'https://www.youtube.com/watch?v=HB1snh5ArVw',
+            duration: 715
         },
         {
             title: 'Sleep and Mental Wellness',
-            url: 'https://example.com/video11.mp4',
-            duration: 900 // 15 minutes
+            url: 'https://www.youtube.com/watch?v=236eHGCSPvI',
+            duration: 355
         },
         {
             title: 'Brain-Healthy Nutrition',
-            url: 'https://example.com/video12.mp4',
-            duration: 1020 // 17 minutes
+            url: 'https://www.youtube.com/watch?v=xNXxBlytth8',
+            duration: 255
         },
         {
             title: 'Digital Wellness Strategies',
-            url: 'https://example.com/video13.mp4',
-            duration: 720 // 12 minutes
+            url: 'https://www.youtube.com/watch?v=jYzNRu76F8I',
+            duration: 247
         },
         {
             title: 'Managing Workplace Stress',
-            url: 'https://example.com/video14.mp4',
-            duration: 840 // 14 minutes
+            url: 'https://www.youtube.com/watch?v=QE8kNh52EeU',
+            duration: 639
         },
         {
             title: 'Effective Family Communication',
-            url: 'https://example.com/video15.mp4',
-            duration: 960 // 16 minutes
+            url: 'https://www.youtube.com/watch?v=ImAlo7urjRQ',
+            duration: 262
         },
         {
             title: 'Trauma Recovery Process',
-            url: 'https://example.com/video16.mp4',
-            duration: 1140 // 19 minutes
+            url: 'https://www.youtube.com/watch?v=qrPb0nutBrg',
+            duration: 375
         },
         {
             title: 'Addiction Recovery Journey',
-            url: 'https://example.com/video17.mp4',
-            duration: 1080 // 18 minutes
+            url: 'https://www.youtube.com/watch?v=yAHn1kSo9l8',
+            duration: 649
         },
         {
             title: 'LGBTQ+ Mental Health Support',
-            url: 'https://example.com/video18.mp4',
-            duration: 900 // 15 minutes
+            url: 'https://www.youtube.com/watch?v=Rfhgs9QclEM',
+            duration: 265
         },
         {
             title: 'Mental Health in Aging',
-            url: 'https://example.com/video19.mp4',
-            duration: 780 // 13 minutes
+            url: 'https://www.youtube.com/watch?v=C2dum954yIg',
+            duration: 326
         },
         {
             title: 'Supporting Young Minds',
-            url: 'https://example.com/video20.mp4',
-            duration: 660 // 11 minutes
+            url: 'https://www.youtube.com/watch?v=dPB8oQBD1qE',
+            duration: 64
         }
     ];
 
