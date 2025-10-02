@@ -2,12 +2,14 @@
 const express = require('express');
 const courseController = require('../controllers/courseController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const roleMiddleware = require('../middlewares/roleMiddleware');
 const {
     getMyCoursesValidationRules,
     getCourseProgressValidationRules,
     getAllCoursesValidationRules,
     getCourseByIdValidationRules,
-    getCoursesByTypeValidationRules
+    getCoursesByTypeValidationRules,
+    createCourseValidationRules
 } = require('../validators/courseValidators');
 const validationResultHandler = require('../middlewares/validationResultHandler');
 
@@ -344,6 +346,15 @@ router.get('/:courseId/progress',
     getCourseProgressValidationRules,
     validationResultHandler,
     courseController.getCourseProgress
+);
+
+// POST /api/v1/courses - Create new course (Teacher only)
+router.post('/',
+    authMiddleware,
+    roleMiddleware(['teacher']),
+    createCourseValidationRules,
+    validationResultHandler,
+    courseController.createCourse
 );
 
 // ========== PARAMETERIZED ROUTES (Must be last) ==========

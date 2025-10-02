@@ -41,6 +41,10 @@ const courseSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  courseImg: {
+    type: String,
+    trim: true
+  },
   category: {
     type: String,
     enum: ['Mental Health', 'Wellness', 'Therapy', 'Self-Care'],
