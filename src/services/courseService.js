@@ -343,6 +343,7 @@ class CourseService {
                         totalHours: 1,
                         lessons: '$lessonsCount',
                         features: 1,
+                        courseImg: 1,
                         createdAt: 1
                     }
                 },
@@ -460,6 +461,7 @@ class CourseService {
                 description: basicCourse.description,
                 price: basicCourse.price,
                 category: basicCourse.category,
+                courseImg: basicCourse.courseImg,
                 isPublished: basicCourse.isPublished,
                 instructor: instructor,
                 lessons: lessons,
@@ -850,6 +852,72 @@ class CourseService {
             };
         } catch (error) {
             throw new CustomError('Error fetching user courses', 500);
+        }
+    }
+
+    async createCourse(courseData) {
+        try {
+            const {
+                title,
+                description,
+                price,
+                originalPrice,
+                category,
+                ageRange,
+                courseType,
+                totalHours,
+                courseImg,
+                instructor,
+                features = [],
+                isPublished = false
+            } = courseData;
+
+            // Validate required fields
+            if (!title || !description || !price || !category || !instructor) {
+                throw new CustomError('Missing required fields: title, description, price, category, instructor', 400);
+            }
+
+            // Validate instructor exists and is a teacher
+            const instructorUser = await User.findById(instructor);
+            if (!instructorUser) {
+                throw new CustomError('Instructor not found', 404);
+            }
+
+            if (instructorUser.role !== 'teacher') {
+                throw new CustomError('Instructor must be a teacher', 400);
+            }
+
+            // Create new course
+            const newCourse = new Course({
+                title: title.trim(),
+                description: description.trim(),
+                price: parseFloat(price),
+                originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
+                category: category.trim(),
+                ageRange: ageRange || null,
+                courseType: courseType || 'individual',
+                totalHours: totalHours ? parseFloat(totalHours) : 0,
+                courseImg: courseImg ? courseImg.trim() : null,
+                instructor,
+                features,
+                isPublished,
+                enrolledUsers: [],
+                lessons: [],
+                rating: 0,
+                reviews: []
+            });
+
+            const savedCourse = await newCourse.save();
+
+            // Populate instructor info for response
+            await savedCourse.populate('instructor', 'name email avatar bio');
+
+            return savedCourse;
+        } catch (error) {
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError(`Error creating course: ${error.message}`, 500);
         }
     }
 }

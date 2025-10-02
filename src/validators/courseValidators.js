@@ -1,7 +1,8 @@
 // src/validators/courseValidators.js
 const {
     query,
-    param
+    param,
+    body
 } = require('express-validator');
 
 exports.getMyCoursesValidationRules = [
@@ -166,4 +167,85 @@ exports.getCoursesByTypeValidationRules = [
     .optional()
     .isIn(['asc', 'desc'])
     .withMessage('Sort order must be asc or desc')
+];
+
+exports.createCourseValidationRules = [
+    body('title')
+    .trim()
+    .isLength({
+        min: 3,
+        max: 200
+    })
+    .withMessage('Title must be between 3-200 characters'),
+
+    body('description')
+    .trim()
+    .isLength({
+        min: 10,
+        max: 2000
+    })
+    .withMessage('Description must be between 10-2000 characters'),
+
+    body('price')
+    .isFloat({
+        min: 0
+    })
+    .withMessage('Price must be a positive number'),
+
+    body('originalPrice')
+    .optional()
+    .isFloat({
+        min: 0
+    })
+    .withMessage('Original price must be a positive number'),
+
+    body('category')
+    .trim()
+    .isLength({
+        min: 2,
+        max: 50
+    })
+    .withMessage('Category must be between 2-50 characters'),
+
+    body('ageRange')
+    .optional()
+    .isIn(['children', 'teenagers', 'adults'])
+    .withMessage('Age range must be children, teenagers, or adults'),
+
+    body('courseType')
+    .optional()
+    .isIn(['individual', 'group', 'corporate'])
+    .withMessage('Course type must be individual, group, or corporate'),
+
+    body('totalHours')
+    .optional()
+    .isFloat({
+        min: 0
+    })
+    .withMessage('Total hours must be a positive number'),
+
+    body('courseImg')
+    .optional()
+    .isURL()
+    .withMessage('Course image must be a valid URL'),
+
+    body('features')
+    .optional()
+    .isArray()
+    .withMessage('Features must be an array'),
+
+    body('features.*')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({
+        min: 1,
+        max: 100
+    })
+    .withMessage('Each feature must be a string between 1-100 characters'),
+
+    body('isPublished')
+    .optional()
+    .isBoolean()
+    .withMessage('isPublished must be a boolean')
 ];

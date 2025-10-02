@@ -151,6 +151,22 @@ class CourseController {
         const result = await courseService.getMyCourses(userId, options);
         return ApiResponse.successResponse(res, 200, result, 'User courses retrieved successfully');
     });
+
+    // POST /api/v1/courses - Teacher only endpoint
+    createCourse = catchAsync(async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return ApiResponse.errorResponse(res, 400, 'Validation failed', errors.array());
+        }
+
+        const courseData = {
+            ...req.body,
+            instructor: req.user.id // Set instructor to current authenticated user
+        };
+
+        const newCourse = await courseService.createCourse(courseData);
+        return ApiResponse.successResponse(res, 201, newCourse, 'Course created successfully');
+    });
 }
 
 module.exports = new CourseController();
