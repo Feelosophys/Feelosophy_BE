@@ -26,3 +26,7 @@ exports.changePasswordValidationRules = [
         min: 6
     }).withMessage('New password min 6 chars'),
 ];
+
+exports.logoutValidationRules = [
+    body('refreshToken').notEmpty().withMessage('Refresh token is required'),
+];

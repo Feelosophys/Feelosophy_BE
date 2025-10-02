@@ -15,14 +15,19 @@ function generateRefreshToken(userId) {
             id: userId
         },
         process.env.JWT_SECRET, {
-            expiresIn: '7d'
+            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
         }
     );
+}
+
+function verifyRefreshToken(token) {
+    return jwt.verify(token, process.env.JWT_SECRET);
 }
 
 module.exports = {
     generateToken,
     verifyToken,
     secret: process.env.JWT_SECRET,
-    generateRefreshToken
+    generateRefreshToken,
+    verifyRefreshToken
 };

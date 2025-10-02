@@ -118,7 +118,7 @@ class CourseService {
             const enrichedCourses = enrollments.map(enrollment => ({
                 ...enrollment,
                 progressPercentage: 0, // TODO: Implement lesson progress tracking
-                totalLessons: enrollment.course.lessons ? .length || 0,
+                //   totalLessons: enrollment.course.lessons ? .length || 0,
 
                 enrollmentDuration: Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24)) // days
             }));
@@ -144,61 +144,61 @@ class CourseService {
         }
     }
 
-    async getCourseProgress(userId, courseId) {
-        try {
-            // Tìm enrollment của user cho course này
-            const enrollment = await UserCourse.findOne({
-                userId,
-                courseId
-            }).populate({
-                path: 'courseId',
-                select: 'title description lessons',
-                populate: {
-                    path: 'lessons',
-                    select: 'title duration'
-                }
-            });
+    // async getCourseProgress(userId, courseId) {
+    //     try {
+    //         // Tìm enrollment của user cho course này
+    //         const enrollment = await UserCourse.findOne({
+    //             userId,
+    //             courseId
+    //         }).populate({
+    //             path: 'courseId',
+    //             select: 'title description lessons',
+    //             populate: {
+    //                 path: 'lessons',
+    //                 select: 'title duration'
+    //             }
+    //         });
 
-            if (!enrollment) {
-                throw new CustomError('Course enrollment not found', 404);
-            }
+    //         if (!enrollment) {
+    //             throw new CustomError('Course enrollment not found', 404);
+    //         }
 
-            const course = enrollment.courseId;
-            totalLessons: enrollment.course.lessons ? .length || 0,
+    //         const course = enrollment.courseId;
+    //         totalLessons: enrollment.course.lessons ? .length || 0,
 
-                // TODO: Implement lesson completion tracking
-                // Hiện tại return mock data
-                const completedLessons = 0;
-            const progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+    //             // TODO: Implement lesson completion tracking
+    //             // Hiện tại return mock data
+    //            // const completedLessons = 0;
+    //        // const progressPercentage = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
 
-            // Tính thời gian học
-            const enrollmentDuration = Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24));
+    //         // Tính thời gian học
+    //         //const enrollmentDuration = Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24));
 
-            return {
-                courseId: course._id,
-                courseTitle: course.title,
-                courseDescription: course.description,
-                enrollment: {
-                    status: enrollment.status,
-                    enrolledAt: enrollment.enrolledAt,
-                    viaOrganization: enrollment.viaOrganization,
-                    enrollmentDuration: `${enrollmentDuration} days`
-                },
-                progress: {
-                    totalLessons,
-                    completedLessons,
-                    progressPercentage,
-                    nextLesson: totalLessons > 0 ? course.lessons[0] : null // First lesson as next
-                },
-                lessons: course.lessons || []
-            };
-        } catch (error) {
-            if (error instanceof CustomError) {
-                throw error;
-            }
-            throw new CustomError('Error fetching course progress', 500);
-        }
-    }
+    //         // return {
+    //         //     courseId: course._id,
+    //         //     courseTitle: course.title,
+    //         //     courseDescription: course.description,
+    //         //     enrollment: {
+    //         //         status: enrollment.status,
+    //         //         enrolledAt: enrollment.enrolledAt,
+    //         //         viaOrganization: enrollment.viaOrganization,
+    //         //         enrollmentDuration: `${enrollmentDuration} days`
+    //         //     },
+    //         //     progress: {
+    //         //         totalLessons,
+    //         //         completedLessons,
+    //         //         progressPercentage,
+    //         //         nextLesson: totalLessons > 0 ? course.lessons[0] : null // First lesson as next
+    //         //     },
+    //         //     lessons: course.lessons || []
+    //         // };
+    //     } catch (error) {
+    //         if (error instanceof CustomError) {
+    //             throw error;
+    //         }
+    //         throw new CustomError('Error fetching course progress', 500);
+    //     }
+    // }
 
     async getEnrollmentStats(userId) {
         try {

@@ -5,6 +5,9 @@ const {
     successResponse
 } = require('../utils/apiResponse');
 const catchAsync = require('../utils/catchAsync');
+const {
+    getIo
+} = require('../config/socketConfig');
 
 /**
  * @swagger
@@ -215,6 +218,18 @@ exports.addComment = catchAsync(async (req, res) => {
         content
     } = req.body;
     const comment = await forumService.addComment(id, userId, content);
+
+    // Emit socket event to all users in forum room
+    try {
+        const io = getIo();
+        io.to(`forum_${id}`).emit('new-comment', {
+            postId: id,
+            comment: comment
+        });
+    } catch (error) {
+        console.log('Socket emit error:', error);
+    }
+
     successResponse(res, 201, comment, 'Comment added successfully');
 });
 
@@ -255,5 +270,17 @@ exports.addReaction = catchAsync(async (req, res) => {
         type
     } = req.body;
     const reaction = await forumService.addReaction(id, userId, type);
+
+    // Emit socket event to all users in forum room
+    try {
+        const io = getIo();
+        io.to(`forum_${id}`).emit('new-reaction', {
+            postId: id,
+            reaction: reaction
+        });
+    } catch (error) {
+        console.log('Socket emit error:', error);
+    }
+
     successResponse(res, 200, reaction, 'Reaction added successfully');
 });

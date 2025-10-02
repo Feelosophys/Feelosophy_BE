@@ -41,6 +41,20 @@ exports.getForumPosts = async (filters = {}) => {
 
     return await Forum.find(query)
         .populate('authorId', 'name email avatar')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'userId',
+                select: 'name email avatar'
+            }
+        })
+        .populate({
+            path: 'reactions',
+            populate: {
+                path: 'userId',
+                select: 'name'
+            }
+        })
         .sort({
             createdAt: -1
         })

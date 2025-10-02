@@ -1,12 +1,52 @@
 const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
 const {
     hashPassword,
     comparePassword
 } = require('../config/encoderConfig');
-const {
-    generateToken
-} = require('../config/jwtAuthConfig');
+const jwtConfig = require('../config/jwtAuthConfig');
 const AppError = require('../utils/customError');
+
+const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+const sanitizeUser = (user) => ({
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role || 'user',
+    roles: user.roles || [user.role || 'user'],
+    avatar: user.avatar || null,
+    title: user.title || null,
+    isVerified: user.isVerified,
+});
+
+const createRefreshTokenRecord = async (userId, token) => {
+    await RefreshToken.deleteMany({
+        userId
+    });
+
+    await RefreshToken.create({
+        userId,
+        token,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS)
+    });
+};
+
+const buildAuthResponse = async (user) => {
+    const accessToken = jwtConfig.generateToken({
+        id: user._id,
+        roles: user.roles
+    });
+    const refreshToken = jwtConfig.generateRefreshToken(user._id);
+
+    await createRefreshTokenRecord(user._id, refreshToken);
+
+    return {
+        user: sanitizeUser(user),
+        accessToken,
+        refreshToken
+    };
+};
 
 exports.register = async ({
     name,
@@ -17,30 +57,16 @@ exports.register = async ({
         email
     });
     if (existing) throw new AppError('Email already in use', 400);
+
     const hashed = await hashPassword(password);
     const user = await User.create({
         name,
         email,
         password: hashed
     });
-    const token = generateToken({
-        id: user._id,
-        roles: user.roles
-    });
-    return {
-        user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            roles: user.roles
-        },
-        token
-    };
-};
 
-const RefreshToken = require('../models/RefreshToken');
-const jwt = require('jsonwebtoken');
-const jwtConfig = require('../config/jwtAuthConfig');
+    return buildAuthResponse(user);
+};
 
 exports.login = async ({
     email,
@@ -49,55 +75,72 @@ exports.login = async ({
     const user = await User.findOne({
         email
     }).select('+password');
+
     if (!user || !(await comparePassword(password, user.password))) {
         throw new AppError('Invalid credentials', 401);
     }
 
-    const accessToken = jwtConfig.generateToken({
-        id: user._id,
-        roles: user.roles
-    });
-
-    const refreshToken = jwtConfig.generateRefreshToken(user._id);
-
-    await RefreshToken.create({
-        userId: user._id,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    });
-
-    return {
-        user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            roles: user.roles
-        },
-        accessToken,
-        refreshToken
-    };
+    return buildAuthResponse(user);
 };
 
 exports.refreshToken = async (refreshToken) => {
-    const found = await RefreshToken.findOne({
+    if (!refreshToken) {
+        throw new AppError('Refresh token is required', 400);
+    }
+
+    const tokenRecord = await RefreshToken.findOne({
         token: refreshToken
     });
-    if (!found || found.expiresAt < new Date()) {
+
+    if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
+        if (tokenRecord) {
+            await tokenRecord.deleteOne();
+        }
         throw new AppError('Refresh token invalid or expired', 401);
     }
 
-    const payload = jwtConfig.verifyToken(refreshToken);
+    let payload;
+    try {
+        payload = jwtConfig.verifyRefreshToken(refreshToken);
+    } catch (error) {
+        await tokenRecord.deleteOne();
+        throw new AppError('Refresh token invalid or expired', 401);
+    }
 
     const user = await User.findById(payload.id);
-    if (!user) throw new AppError('User not found', 404);
+    if (!user) {
+        await tokenRecord.deleteOne();
+        throw new AppError('User not found', 404);
+    }
 
     const accessToken = jwtConfig.generateToken({
         id: user._id,
         roles: user.roles
     });
+    const newRefreshToken = jwtConfig.generateRefreshToken(user._id);
+
+    tokenRecord.token = newRefreshToken;
+    tokenRecord.expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
+    await tokenRecord.save();
 
     return {
-        accessToken
+        user: sanitizeUser(user),
+        accessToken,
+        refreshToken: newRefreshToken
+    };
+};
+
+exports.logout = async (refreshToken) => {
+    if (!refreshToken) {
+        throw new AppError('Refresh token is required', 400);
+    }
+
+    await RefreshToken.deleteOne({
+        token: refreshToken
+    });
+
+    return {
+        message: 'Logged out successfully'
     };
 };
 
@@ -118,10 +161,4 @@ exports.changePassword = async ({
     };
 };
 
-exports.generateTokenForUser = async (user) => {
-    const token = generateToken({
-        id: user._id,
-        roles: user.roles
-    });
-    return token;
-};
+exports.generateTokenForUser = async (user) => buildAuthResponse(user);

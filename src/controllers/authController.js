@@ -60,6 +60,14 @@ exports.login = catchAsync(async (req, res) => {
     successResponse(res, 200, result, 'Login successful');
 });
 
+exports.logout = catchAsync(async (req, res) => {
+    const {
+        refreshToken
+    } = req.body;
+    const result = await authService.logout(refreshToken);
+    successResponse(res, 200, result, 'Logout successful');
+});
+
 /**
  * @swagger
  * /api/v1/auth/refresh-token:
@@ -134,7 +142,20 @@ exports.changePassword = catchAsync(async (req, res) => {
  */
 exports.googleAuthCallback = catchAsync(async (req, res) => {
     const user = req.user;
-    const token = await authService.generateTokenForUser(user);
-    // Redirect to frontend with token, or send JSON
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}`);
+    const {
+        accessToken,
+        refreshToken,
+        user: sanitizedUser
+    } = await authService.generateTokenForUser(user);
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const url = new URL(`${frontendUrl}/auth/callback`);
+    url.searchParams.set('accessToken', accessToken);
+    url.searchParams.set('refreshToken', refreshToken);
+    if (sanitizedUser) {
+        const encodedUser = Buffer.from(JSON.stringify(sanitizedUser)).toString('base64url');
+        url.searchParams.set('user', encodedUser);
+    }
+
+    res.redirect(url.toString());
 });
