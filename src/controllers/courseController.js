@@ -45,6 +45,86 @@ class CourseController {
         return ApiResponse.successResponse(res, 200, progress, 'Course progress retrieved successfully');
     });
 
+    /**
+     * @swagger
+     * /api/v1/courses/{courseId}/learn:
+     *   get:
+     *     summary: Get learning content for a purchased course
+     *     tags: [My Courses]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: courseId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course learning content retrieved successfully
+     *       401:
+     *         description: Unauthorized
+     *       403:
+     *         description: User is not enrolled in this course
+     *       404:
+     *         description: Course not found
+     */
+    getCourseLearningContent = catchAsync(async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return ApiResponse.errorResponse(res, 400, 'Validation failed', errors.array());
+        }
+
+        const userId = req.user.id;
+        const {
+            courseId
+        } = req.params;
+
+        const learningContent = await courseService.getCourseLearningContent(userId, courseId);
+        return ApiResponse.successResponse(res, 200, learningContent, 'Course learning content retrieved successfully');
+    });
+
+    /**
+     * @swagger
+     * /api/v1/courses/{courseId}/my-details:
+     *   get:
+     *     summary: Get full course details for a purchased course
+     *     tags: [My Courses]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: courseId
+     *         required: true
+     *         schema:
+     *           type: string
+     *         description: Course ID
+     *     responses:
+     *       200:
+     *         description: Course details retrieved successfully
+     *       401:
+     *         description: Unauthorized
+     *       403:
+     *         description: User is not enrolled in this course
+     *       404:
+     *         description: Course not found
+     */
+    getPurchasedCourseDetails = catchAsync(async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return ApiResponse.errorResponse(res, 400, 'Validation failed', errors.array());
+        }
+
+        const userId = req.user.id;
+        const {
+            courseId
+        } = req.params;
+
+        const courseDetails = await courseService.getPurchasedCourseDetails(userId, courseId);
+        return ApiResponse.successResponse(res, 200, courseDetails, 'Purchased course details retrieved successfully');
+    });
+
     // GET /api/v1/courses/enrollment-stats
     getEnrollmentStats = catchAsync(async (req, res) => {
         const userId = req.user.id;

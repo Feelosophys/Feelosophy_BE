@@ -348,6 +348,20 @@ router.get('/:courseId/progress',
     courseController.getCourseProgress
 );
 
+router.get('/:courseId/learn',
+    authMiddleware,
+    getCourseProgressValidationRules,
+    validationResultHandler,
+    courseController.getCourseLearningContent
+);
+
+router.get('/:courseId/my-details',
+    authMiddleware,
+    getCourseProgressValidationRules,
+    validationResultHandler,
+    courseController.getPurchasedCourseDetails
+);
+
 // POST /api/v1/courses - Create new course (Teacher only)
 router.post('/',
     authMiddleware,

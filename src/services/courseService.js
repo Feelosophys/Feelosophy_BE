@@ -1,9 +1,59 @@
 // src/services/courseService.js
 // Handles business logic for courses
+const mongoose = require('mongoose');
 const Course = require('../models/Course');
 const UserCourse = require('../models/UserCourse');
 const User = require('../models/User');
+const Lesson = require('../models/Lesson');
+require('../models/Video');
+require('../models/Document');
 const CustomError = require('../utils/customError');
+
+const buildLessonContent = (lessonDocs = []) => {
+    let totalVideos = 0;
+    let totalDocuments = 0;
+
+    const lessons = lessonDocs
+        .filter(Boolean)
+        .map((lesson, index) => {
+            const videos = Array.isArray(lesson.videos) ? lesson.videos.filter(Boolean).map(video => ({
+                _id: video._id,
+                title: video.title,
+                url: video.url,
+                duration: video.duration || 0,
+                createdAt: video.createdAt,
+                updatedAt: video.updatedAt
+            })) : [];
+
+            const documents = Array.isArray(lesson.documents) ? lesson.documents.filter(Boolean).map(document => ({
+                _id: document._id,
+                name: document.name,
+                fileUrl: document.fileUrl,
+                createdAt: document.createdAt,
+                updatedAt: document.updatedAt
+            })) : [];
+
+            totalVideos += videos.length;
+            totalDocuments += documents.length;
+
+            return {
+                _id: lesson._id,
+                title: lesson.title,
+                order: index + 1,
+                videos,
+                documents,
+                createdAt: lesson.createdAt,
+                updatedAt: lesson.updatedAt
+            };
+        });
+
+    return {
+        lessons,
+        totalLessons: lessons.length,
+        totalVideos,
+        totalDocuments
+    };
+};
 
 class CourseService {
     async getMyCourses(userId, options = {}) {
@@ -16,9 +66,16 @@ class CourseService {
                     sortOrder = 'desc'
             } = options;
 
+            const isValidUserId = mongoose.Types.ObjectId.isValid(userId);
+            if (!isValidUserId) {
+                throw new CustomError('Invalid user identifier provided', 400);
+            }
+
+            const userObjectId = new mongoose.Types.ObjectId(userId);
+
             // Build query for UserCourse
             const query = {
-                userId
+                userId: userObjectId
             };
             if (status !== 'all') {
                 query.status = status;
@@ -39,7 +96,9 @@ class CourseService {
             const pipeline = [
                 // Match user's enrollments
                 {
-                    $match: query
+                    $match: {
+                        userId: userObjectId
+                    }
                 },
 
                 // Join với Course collection
@@ -48,24 +107,27 @@ class CourseService {
                         from: 'courses',
                         localField: 'courseId',
                         foreignField: '_id',
-                        as: 'course'
+                        as: 'courseData'
                     }
                 },
                 {
-                    $unwind: '$course'
+                    $unwind: '$courseData'
                 },
 
-                // Join với User collection để lấy instructor info
+                // Join với User collection để lấy instructor info (cho phép thiếu dữ liệu)
                 {
                     $lookup: {
                         from: 'users',
-                        localField: 'course.instructor',
+                        localField: 'courseData.instructor',
                         foreignField: '_id',
-                        as: 'course.instructorInfo'
+                        as: 'instructorInfo'
                     }
                 },
                 {
-                    $unwind: '$course.instructorInfo'
+                    $unwind: {
+                        path: '$instructorInfo',
+                        preserveNullAndEmptyArrays: true
+                    }
                 },
 
                 // Project chỉ những field cần thiết
@@ -73,25 +135,34 @@ class CourseService {
                     $project: {
                         _id: 1,
                         enrolledAt: 1,
+                        updatedAt: 1,
                         status: 1,
                         viaOrganization: 1,
                         paymentId: 1,
-                        'course._id': 1,
-                        'course.title': 1,
-                        'course.description': 1,
-                        'course.price': 1,
-                        'course.originalPrice': 1,
-                        'course.rating': 1,
-                        'course.category': 1,
-                        'course.ageRange': 1,
-                        'course.courseType': 1,
-                        'course.totalHours': 1,
-                        'course.isPublished': 1,
-                        'course.lessons': 1,
-                        'course.createdAt': 1,
-                        'course.instructorInfo.name': 1,
-                        'course.instructorInfo._id': 1,
-                        'course.instructorInfo.avatar': 1
+                        course: {
+                            _id: '$courseData._id',
+                            title: '$courseData.title',
+                            description: '$courseData.description',
+                            price: '$courseData.price',
+                            originalPrice: '$courseData.originalPrice',
+                            rating: '$courseData.rating',
+                            category: '$courseData.category',
+                            ageRange: '$courseData.ageRange',
+                            courseType: '$courseData.courseType',
+                            totalHours: '$courseData.totalHours',
+                            courseDuration: '$courseData.courseDuration',
+                            students: '$courseData.students',
+                            courseImg: '$courseData.courseImg',
+                            isPublished: '$courseData.isPublished',
+                            lessons: '$courseData.lessons',
+                            createdAt: '$courseData.createdAt',
+                            updatedAt: '$courseData.updatedAt',
+                            instructorInfo: {
+                                _id: '$instructorInfo._id',
+                                name: '$instructorInfo.name',
+                                avatar: '$instructorInfo.avatar'
+                            }
+                        }
                     }
                 },
 
@@ -109,34 +180,95 @@ class CourseService {
                 }
             ];
 
-            const [enrollments, totalCount] = await Promise.all([
+            const statusStatsPipeline = [{
+                    $match: {
+                        userId: userObjectId
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$status',
+                        count: {
+                            $sum: 1
+                        }
+                    }
+                }
+            ];
+
+            const [enrollments, totalCount, statusStats] = await Promise.all([
                 UserCourse.aggregate(pipeline),
-                UserCourse.countDocuments(query)
+                UserCourse.countDocuments(query),
+                UserCourse.aggregate(statusStatsPipeline)
             ]);
 
             // Tính toán thêm thông tin cho mỗi course
-            const enrichedCourses = enrollments.map(enrollment => ({
-                ...enrollment,
-                progressPercentage: 0, // TODO: Implement lesson progress tracking
-                //   totalLessons: enrollment.course.lessons ? .length || 0,
+            const enrichedCourses = enrollments.map(enrollment => {
+                const lessonsArray = Array.isArray(enrollment.course?.lessons) ? enrollment.course.lessons : [];
+                const totalLessons = lessonsArray.length;
+                const progressPercentage = enrollment.status === 'completed' ? 100 : 0;
+                const completedLessons = enrollment.status === 'completed' ? totalLessons : 0;
+                const lastAccessed = enrollment.updatedAt || enrollment.enrolledAt;
 
-                enrollmentDuration: Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24)) // days
-            }));
+                const rawInstructor = enrollment.course?.instructorInfo;
+                const instructorInfo = rawInstructor && rawInstructor._id ? {
+                    _id: rawInstructor._id,
+                    name: rawInstructor.name,
+                    avatar: rawInstructor.avatar || null
+                } : null;
+
+                const paymentId = enrollment.paymentId ? enrollment.paymentId.toString() : null;
+
+                const sanitizedCourse = {
+                    _id: enrollment.course?._id,
+                    title: enrollment.course?.title,
+                    description: enrollment.course?.description,
+                    price: enrollment.course?.price,
+                    originalPrice: enrollment.course?.originalPrice,
+                    rating: enrollment.course?.rating,
+                    category: enrollment.course?.category,
+                    ageRange: enrollment.course?.ageRange,
+                    courseType: enrollment.course?.courseType,
+                    totalHours: enrollment.course?.totalHours,
+                    courseDuration: enrollment.course?.courseDuration,
+                    students: enrollment.course?.students || 0,
+                    courseImg: enrollment.course?.courseImg || null,
+                    isPublished: enrollment.course?.isPublished,
+                    createdAt: enrollment.course?.createdAt,
+                    updatedAt: enrollment.course?.updatedAt,
+                    instructorInfo,
+                    totalLessons
+                };
+
+                return {
+                    _id: enrollment._id,
+                    enrolledAt: enrollment.enrolledAt,
+                    updatedAt: enrollment.updatedAt,
+                    status: enrollment.status,
+                    viaOrganization: enrollment.viaOrganization,
+                    paymentId,
+                    course: sanitizedCourse,
+                    totalLessons,
+                    completedLessons,
+                    progressPercentage,
+                    enrollmentDuration: Math.floor((new Date() - new Date(enrollment.enrolledAt)) / (1000 * 60 * 60 * 24)),
+                    lastAccessed
+                };
+            });
 
             return {
                 courses: enrichedCourses,
                 pagination: {
                     currentPage: parseInt(page),
-                    totalPages: Math.ceil(totalCount / limit),
+                    totalPages: Math.max(1, Math.ceil(totalCount / limit)),
                     totalCount,
                     hasNextPage: page < Math.ceil(totalCount / limit),
                     hasPrevPage: page > 1,
                     limit: parseInt(limit)
                 },
                 summary: {
-                    totalEnrolled: totalCount,
-                    completedCourses: enrollments.filter(e => e.status === 'completed').length,
-                    activeCourses: enrollments.filter(e => e.status === 'enrolled').length
+                    totalEnrolled: statusStats.reduce((sum, stat) => sum + (stat.count || 0), 0),
+                    completedCourses: statusStats.find(stat => stat._id === 'completed')?.count || 0,
+                    activeCourses: statusStats.find(stat => stat._id === 'enrolled')?.count || 0
                 }
             };
         } catch (error) {
@@ -746,6 +878,284 @@ class CourseService {
             return courses;
         } catch (error) {
             throw new CustomError('Error fetching top rated courses', 500);
+        }
+    }
+
+    async getCourseLearningContent(userId, courseId) {
+        try {
+            const isValidUserId = mongoose.Types.ObjectId.isValid(userId);
+            const isValidCourseId = mongoose.Types.ObjectId.isValid(courseId);
+
+            if (!isValidUserId || !isValidCourseId) {
+                throw new CustomError('Invalid course or user identifier provided', 400);
+            }
+
+            const userObjectId = new mongoose.Types.ObjectId(userId);
+            const courseObjectId = new mongoose.Types.ObjectId(courseId);
+
+            const enrollment = await UserCourse.findOne({
+                    userId: userObjectId,
+                    courseId: courseObjectId
+                })
+                .populate({
+                    path: 'paymentId',
+                    select: 'status amount method createdAt updatedAt'
+                })
+                .lean();
+
+            if (!enrollment) {
+                throw new CustomError('Bạn chưa đăng ký khóa học này', 403);
+            }
+
+            const course = await Course.findById(courseObjectId)
+                .populate({
+                    path: 'instructor',
+                    select: 'name email avatar bio title'
+                })
+                .lean();
+
+            if (!course) {
+                throw new CustomError('Course not found', 404);
+            }
+
+            const lessonDocs = await Lesson.find({
+                    course: courseObjectId
+                })
+                .select('title videos documents createdAt updatedAt')
+                .populate({
+                    path: 'videos',
+                    select: 'title url duration createdAt updatedAt'
+                })
+                .populate({
+                    path: 'documents',
+                    select: 'name fileUrl createdAt updatedAt'
+                })
+                .sort({
+                    createdAt: 1
+                })
+                .lean();
+
+            const {
+                lessons: curriculum,
+                totalLessons,
+                totalVideos,
+                totalDocuments
+            } = buildLessonContent(lessonDocs);
+            const progressPercentage = enrollment.status === 'completed' ? 100 : 0;
+            const completedLessons = enrollment.status === 'completed' ? totalLessons : 0;
+
+            return {
+                course: {
+                    _id: course._id,
+                    title: course.title,
+                    description: course.description,
+                    category: course.category,
+                    courseImg: course.courseImg,
+                    rating: course.rating,
+                    totalHours: course.totalHours,
+                    courseDuration: course.courseDuration,
+                    totalLessons,
+                    totalVideos,
+                    instructor: course.instructor ? {
+                        _id: course.instructor._id,
+                        name: course.instructor.name,
+                        email: course.instructor.email,
+                        avatar: course.instructor.avatar,
+                        bio: course.instructor.bio,
+                        title: course.instructor.title
+                    } : null,
+                    stats: {
+                        totalEnrollments: Array.isArray(course.enrolledUsers) ? course.enrolledUsers.length : 0,
+                        totalLessons,
+                        totalVideos,
+                        totalDocuments,
+                        createdAt: course.createdAt,
+                        lastUpdated: course.updatedAt
+                    }
+                },
+                enrollment: {
+                    _id: enrollment._id,
+                    status: enrollment.status,
+                    enrolledAt: enrollment.enrolledAt,
+                    updatedAt: enrollment.updatedAt,
+                    viaOrganization: enrollment.viaOrganization,
+                    payment: enrollment.paymentId ? {
+                        _id: enrollment.paymentId._id,
+                        status: enrollment.paymentId.status,
+                        amount: enrollment.paymentId.amount,
+                        method: enrollment.paymentId.method,
+                        createdAt: enrollment.paymentId.createdAt,
+                        updatedAt: enrollment.paymentId.updatedAt
+                    } : null
+                },
+                progress: {
+                    completedLessons,
+                    totalLessons,
+                    percentage: progressPercentage,
+                    lastViewedLessonId: null
+                },
+                curriculum
+            };
+        } catch (error) {
+            console.error('[CourseService.getCourseLearningContent] Failed', {
+                userId,
+                courseId,
+                message: error?.message,
+                stack: error?.stack
+            });
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError(error?.message || 'Error fetching course learning content', 500);
+        }
+    }
+
+    async getPurchasedCourseDetails(userId, courseId) {
+        try {
+            const isValidUserId = mongoose.Types.ObjectId.isValid(userId);
+            const isValidCourseId = mongoose.Types.ObjectId.isValid(courseId);
+
+            if (!isValidUserId || !isValidCourseId) {
+                throw new CustomError('Invalid course or user identifier provided', 400);
+            }
+
+            const userObjectId = new mongoose.Types.ObjectId(userId);
+            const courseObjectId = new mongoose.Types.ObjectId(courseId);
+
+            const enrollment = await UserCourse.findOne({
+                    userId: userObjectId,
+                    courseId: courseObjectId
+                })
+                .populate({
+                    path: 'paymentId',
+                    select: 'status amount method createdAt updatedAt'
+                })
+                .lean();
+
+            if (!enrollment) {
+                throw new CustomError('Bạn chưa đăng ký khóa học này', 403);
+            }
+
+            const course = await Course.findById(courseObjectId)
+                .populate({
+                    path: 'instructor',
+                    select: 'name email avatar bio title'
+                })
+                .lean();
+
+            if (!course) {
+                throw new CustomError('Course not found', 404);
+            }
+
+            const lessonDocs = await Lesson.find({
+                    course: courseObjectId
+                })
+                .select('title videos documents createdAt updatedAt')
+                .populate({
+                    path: 'videos',
+                    select: 'title url duration createdAt updatedAt'
+                })
+                .populate({
+                    path: 'documents',
+                    select: 'name fileUrl createdAt updatedAt'
+                })
+                .sort({
+                    createdAt: 1
+                })
+                .lean();
+
+            const {
+                lessons,
+                totalLessons,
+                totalVideos,
+                totalDocuments
+            } = buildLessonContent(lessonDocs);
+
+            const instructorInfo = course.instructor ? {
+                _id: course.instructor._id,
+                name: course.instructor.name,
+                email: course.instructor.email,
+                avatar: course.instructor.avatar,
+                bio: course.instructor.bio,
+                title: course.instructor.title
+            } : null;
+
+            const reviews = Array.isArray(course.reviews) ? course.reviews.filter(Boolean).map(review => ({
+                _id: review._id,
+                studentName: review.studentName,
+                avatar: review.avatar || null,
+                rating: review.rating,
+                comment: review.comment || null,
+                verified: review.verified || false,
+                date: review.date
+            })) : [];
+
+            const sanitizedCourse = {
+                _id: course._id,
+                title: course.title,
+                description: course.description,
+                price: course.price,
+                originalPrice: course.originalPrice ?? null,
+                rating: course.rating ?? 0,
+                students: course.students ?? 0,
+                instructor: instructorInfo,
+                instructorImage: course.instructorImage || null,
+                courseImg: course.courseImg || null,
+                category: course.category,
+                ageRange: course.ageRange,
+                topics: Array.isArray(course.topics) ? course.topics : [],
+                objectives: Array.isArray(course.objectives) ? course.objectives : [],
+                requirements: Array.isArray(course.requirements) ? course.requirements : [],
+                curriculumOutline: Array.isArray(course.curriculum) ? course.curriculum : [],
+                reviews,
+                courseDuration: course.courseDuration,
+                courseType: course.courseType,
+                features: Array.isArray(course.features) ? course.features : [],
+                corporateFeatures: Array.isArray(course.corporateFeatures) ? course.corporateFeatures : [],
+                minParticipants: course.minParticipants ?? null,
+                maxParticipants: course.maxParticipants ?? null,
+                totalHours: course.totalHours,
+                isPublished: course.isPublished,
+                createdAt: course.createdAt,
+                updatedAt: course.updatedAt,
+                stats: {
+                    totalEnrollments: Array.isArray(course.enrolledUsers) ? course.enrolledUsers.length : 0,
+                    totalLessons,
+                    totalVideos,
+                    totalDocuments
+                },
+                lessons
+            };
+
+            return {
+                course: sanitizedCourse,
+                enrollment: {
+                    _id: enrollment._id,
+                    status: enrollment.status,
+                    enrolledAt: enrollment.enrolledAt,
+                    updatedAt: enrollment.updatedAt,
+                    viaOrganization: enrollment.viaOrganization,
+                    payment: enrollment.paymentId ? {
+                        _id: enrollment.paymentId._id,
+                        status: enrollment.paymentId.status,
+                        amount: enrollment.paymentId.amount,
+                        method: enrollment.paymentId.method,
+                        createdAt: enrollment.paymentId.createdAt,
+                        updatedAt: enrollment.paymentId.updatedAt
+                    } : null
+                }
+            };
+        } catch (error) {
+            console.error('[CourseService.getPurchasedCourseDetails] Failed', {
+                userId,
+                courseId,
+                message: error?.message,
+                stack: error?.stack
+            });
+            if (error instanceof CustomError) {
+                throw error;
+            }
+            throw new CustomError(error?.message || 'Error fetching purchased course details', 500);
         }
     }
 
