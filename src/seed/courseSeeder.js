@@ -1,6 +1,9 @@
 // src/seed/courseSeeder.js
 const Course = require('../models/Course');
 const User = require('../models/User');
+const Lesson = require('../models/Lesson');
+const Video = require('../models/Video');
+const Document = require('../models/Document');
 
 async function seedCourses() {
     // Get instructors
@@ -269,6 +272,97 @@ async function seedCourses() {
             isPublished: true,
             lessons: [],
             enrolledUsers: []
+        },
+        {
+            title: 'Quản lý Stress và Lo âu Cơ bản',
+            description: 'Khóa học toàn diện về cách nhận biết, hiểu và quản lý stress, lo âu trong cuộc sống hàng ngày. Học viên sẽ được trang bị kiến thức và kỹ năng thực tế để đối phó với các tình huống gây căng thẳng, xây dựng sức khỏe tinh thần vững mạnh.',
+            courseImg: 'https://example.com/images/stress-management-course.jpg',
+            price: 10000,
+            originalPrice: 15000,
+            rating: 4.8,
+            students: 450,
+            category: 'Mental Health',
+            ageRange: '18-50',
+            topics: [
+                'Nhận biết dấu hiệu stress',
+                'Kỹ thuật thư giãn và hít thở',
+                'Thiền chánh niệm cơ bản',
+                'Xây dựng thói quen lành mạnh',
+                'Quản lý thời gian hiệu quả',
+                'Xây dựng mạng lưới hỗ trợ'
+            ],
+            objectives: [
+                'Nhận biết được các dấu hiệu của stress và lo âu',
+                'Áp dụng các kỹ thuật thư giãn hiệu quả trong cuộc sống hàng ngày',
+                'Thực hành thiền chánh niệm để cải thiện sức khỏe tinh thần',
+                'Xây dựng và duy trì thói quen sống lành mạnh',
+                'Phát triển kỹ năng quản lý thời gian và ưu tiên công việc',
+                'Xây dựng mạng lưới hỗ trợ xã hội khi cần thiết'
+            ],
+            requirements: [
+                'Không yêu cầu kinh nghiệm trước',
+                'Cam kết dành 30-45 phút mỗi ngày cho việc học và thực hành',
+                'Có không gian yên tĩnh để thực hành thiền',
+                'Sẵn sàng thay đổi thói quen để cải thiện sức khỏe tinh thần'
+            ],
+            curriculum: [
+                'Tuần 1: Hiểu về Stress và Cơ chế Hoạt động',
+                'Tuần 2: Kỹ thuật Thư giãn và Hít thở',
+                'Tuần 3: Thiền Chánh niệm và Tư duy Tích cực',
+                'Tuần 4: Xây dựng Thói quen và Phòng ngừa Stress'
+            ],
+            reviews: [{
+                    studentName: 'Nguyễn Thị Mai',
+                    avatar: 'https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png',
+                    rating: 5,
+                    comment: 'Khóa học rất thực tế và dễ áp dụng. Tôi đã thấy sự thay đổi rõ rệt trong cách quản lý stress của mình.',
+                    verified: true,
+                    date: new Date('2025-10-01')
+                },
+                {
+                    studentName: 'Trần Văn Hùng',
+                    avatar: 'https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png',
+                    rating: 5,
+                    comment: 'Giảng viên hướng dẫn rất tận tình. Các bài tập thực hành rất hữu ích.',
+                    verified: true,
+                    date: new Date('2025-10-02')
+                },
+                {
+                    studentName: 'Lê Thị Lan',
+                    avatar: 'https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png',
+                    rating: 4,
+                    comment: 'Nội dung khoa học, dễ hiểu. Khuyến khích mọi người học.',
+                    verified: true,
+                    date: new Date('2025-10-03')
+                },
+                {
+                    studentName: 'Phạm Minh Tuấn',
+                    avatar: 'https://icons.veryicon.com/png/o/miscellaneous/rookie-official-icon-gallery/225-default-avatar.png',
+                    rating: 5,
+                    comment: 'Đã giúp tôi rất nhiều trong việc cân bằng cuộc sống. Cảm ơn khóa học!',
+                    verified: true,
+                    date: new Date('2025-10-04')
+                }
+            ],
+            courseDuration: '4 tuần',
+            courseType: 'individual',
+            features: [
+                'Video bài giảng chất lượng HD',
+                'Bài tập thực hành hàng ngày',
+                'Tài liệu PDF chi tiết',
+                'Audio hướng dẫn thiền',
+                'Nhật ký theo dõi tiến độ',
+                'Hỗ trợ Q&A với giảng viên',
+                'Cộng đồng học viên',
+                'Chứng chỉ hoàn thành'
+            ],
+            corporateFeatures: [],
+            minParticipants: null,
+            maxParticipants: null,
+            totalHours: 12,
+            isPublished: true,
+            lessons: [],
+            enrolledUsers: []
         }
     ];
 
@@ -286,6 +380,175 @@ async function seedCourses() {
         } else {
             console.log(`Course exists: ${courseData.title}`);
         }
+    }
+
+    // Create detailed lessons, videos, and documents for the stress management course
+    const stressCourse = await Course.findOne({
+        title: 'Quản lý Stress và Lo âu Cơ bản'
+    });
+    if (stressCourse && stressCourse.lessons.length === 0) {
+        console.log('Creating detailed content for stress management course...');
+
+        // Lesson 1: Hiểu về Stress và Cơ chế Hoạt động
+        const lesson1 = await Lesson.create({
+            course: stressCourse._id,
+            title: 'Tuần 1: Hiểu về Stress và Cơ chế Hoạt động',
+            videos: [],
+            documents: []
+        });
+
+        // Videos for Lesson 1
+        const video1_1 = await Video.create({
+            title: 'Stress là gì? Nguyên nhân và tác động',
+            url: 'https://example.com/videos/stress-basics.mp4',
+            duration: 1800, // 30 minutes
+            lessonId: lesson1._id
+        });
+
+        const video1_2 = await Video.create({
+            title: 'Cơ chế hoạt động của stress trong cơ thể',
+            url: 'https://example.com/videos/stress-mechanism.mp4',
+            duration: 1500, // 25 minutes
+            lessonId: lesson1._id
+        });
+
+        // Documents for Lesson 1
+        const doc1_1 = await Document.create({
+            name: 'Bài giảng: Tổng quan về Stress',
+            fileUrl: 'https://example.com/docs/stress-overview.pdf',
+            lessonId: lesson1._id
+        });
+
+        const doc1_2 = await Document.create({
+            name: 'Bài tập: Nhận biết dấu hiệu stress cá nhân',
+            fileUrl: 'https://example.com/docs/stress-signs-worksheet.pdf',
+            lessonId: lesson1._id
+        });
+
+        // Update lesson with videos and documents
+        lesson1.videos = [video1_1._id, video1_2._id];
+        lesson1.documents = [doc1_1._id, doc1_2._id];
+        await lesson1.save();
+
+        // Lesson 2: Kỹ thuật Thư giãn và Hít thở
+        const lesson2 = await Lesson.create({
+            course: stressCourse._id,
+            title: 'Tuần 2: Kỹ thuật Thư giãn và Hít thở',
+            videos: [],
+            documents: []
+        });
+
+        const video2_1 = await Video.create({
+            title: 'Kỹ thuật hít thở 4-7-8',
+            url: 'https://example.com/videos/breathing-478.mp4',
+            duration: 1200, // 20 minutes
+            lessonId: lesson2._id
+        });
+
+        const video2_2 = await Video.create({
+            title: 'Progressive Muscle Relaxation',
+            url: 'https://example.com/videos/pmr-relaxation.mp4',
+            duration: 1800, // 30 minutes
+            lessonId: lesson2._id
+        });
+
+        const doc2_1 = await Document.create({
+            name: 'Hướng dẫn: Các bài tập hít thở',
+            fileUrl: 'https://example.com/docs/breathing-exercises.pdf',
+            lessonId: lesson2._id
+        });
+
+        const doc2_2 = await Document.create({
+            name: 'Nhật ký theo dõi thư giãn hàng ngày',
+            fileUrl: 'https://example.com/docs/relaxation-journal.pdf',
+            lessonId: lesson2._id
+        });
+
+        lesson2.videos = [video2_1._id, video2_2._id];
+        lesson2.documents = [doc2_1._id, doc2_2._id];
+        await lesson2.save();
+
+        // Lesson 3: Thiền Chánh niệm và Tư duy Tích cực
+        const lesson3 = await Lesson.create({
+            course: stressCourse._id,
+            title: 'Tuần 3: Thiền Chánh niệm và Tư duy Tích cực',
+            videos: [],
+            documents: []
+        });
+
+        const video3_1 = await Video.create({
+            title: 'Giới thiệu về Thiền chánh niệm',
+            url: 'https://example.com/videos/mindfulness-intro.mp4',
+            duration: 1500, // 25 minutes
+            lessonId: lesson3._id
+        });
+
+        const video3_2 = await Video.create({
+            title: 'Thay đổi tư duy tiêu cực thành tích cực',
+            url: 'https://example.com/videos/positive-thinking.mp4',
+            duration: 1800, // 30 minutes
+            lessonId: lesson3._id
+        });
+
+        const doc3_1 = await Document.create({
+            name: 'Bài giảng: Thiền chánh niệm cho người mới bắt đầu',
+            fileUrl: 'https://example.com/docs/mindfulness-guide.pdf',
+            lessonId: lesson3._id
+        });
+
+        const doc3_2 = await Document.create({
+            name: 'Bài tập: Thay đổi pattern tư duy',
+            fileUrl: 'https://example.com/docs/thought-patterns-exercise.pdf',
+            lessonId: lesson3._id
+        });
+
+        lesson3.videos = [video3_1._id, video3_2._id];
+        lesson3.documents = [doc3_1._id, doc3_2._id];
+        await lesson3.save();
+
+        // Lesson 4: Xây dựng Thói quen và Phòng ngừa Stress
+        const lesson4 = await Lesson.create({
+            course: stressCourse._id,
+            title: 'Tuần 4: Xây dựng Thói quen và Phòng ngừa Stress',
+            videos: [],
+            documents: []
+        });
+
+        const video4_1 = await Video.create({
+            title: 'Xây dựng routine hàng ngày chống stress',
+            url: 'https://example.com/videos/daily-routine.mp4',
+            duration: 1200, // 20 minutes
+            lessonId: lesson4._id
+        });
+
+        const video4_2 = await Video.create({
+            title: 'Quản lý thời gian và ưu tiên công việc',
+            url: 'https://example.com/videos/time-management.mp4',
+            duration: 1500, // 25 minutes
+            lessonId: lesson4._id
+        });
+
+        const doc4_1 = await Document.create({
+            name: 'Hướng dẫn: Tạo kế hoạch phòng ngừa stress',
+            fileUrl: 'https://example.com/docs/stress-prevention-plan.pdf',
+            lessonId: lesson4._id
+        });
+
+        const doc4_2 = await Document.create({
+            name: 'Checklist: Thói quen lành mạnh',
+            fileUrl: 'https://example.com/docs/healthy-habits-checklist.pdf',
+            lessonId: lesson4._id
+        });
+
+        lesson4.videos = [video4_1._id, video4_2._id];
+        lesson4.documents = [doc4_1._id, doc4_2._id];
+        await lesson4.save();
+
+        // Update course with lessons
+        stressCourse.lessons = [lesson1._id, lesson2._id, lesson3._id, lesson4._id];
+        await stressCourse.save();
+
+        console.log('✅ Created complete course content with 4 lessons, 8 videos, and 8 documents');
     }
 }
 
