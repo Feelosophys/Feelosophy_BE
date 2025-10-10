@@ -85,21 +85,31 @@ exports.joinAppointment = async (userId, appointmentId) => {
 
     // Lấy thông tin từ env
     const appId = process.env.ZEGO_APP_ID;
-    const appSign = process.env.ZEGO_APP_SIGN;
+    const serverSecret = process.env.ZEGO_SERVER_SECRET || process.env.ZEGO_APP_SIGN;
 
-    if (!appId || !appSign) {
+    if (!appId || !serverSecret) {
         throw new AppError('Zego configuration missing', 500);
     }
 
     // Tạo token Zego
-    const token = generateZegoToken(parseInt(appId), userId, appSign, roomId);
+    const resolvedAppId = parseInt(appId, 10);
+    const normalizedUserId = userId.toString();
+    let participantName = 'Feelo User';
+
+    if (appointment.userId && appointment.userId._id && appointment.userId._id.toString() === normalizedUserId) {
+        participantName = appointment.userId.name || participantName;
+    } else if (appointment.teacherId && appointment.teacherId._id && appointment.teacherId._id.toString() === normalizedUserId) {
+        participantName = appointment.teacherId.name || participantName;
+    }
+
+    const token = generateZegoToken(resolvedAppId, normalizedUserId, participantName, serverSecret, roomId);
 
     // Trả về thông tin cho frontend
     return {
         roomId,
         token,
-        appId: parseInt(appId),
-        userId: userId,
+    appId: resolvedAppId,
+    userId: normalizedUserId,
         // Thêm server URL nếu cần
         serverUrl: process.env.ZEGO_SERVER_URL || 'wss://webliveroom-test.zego.im/ws' // Default test server
     };

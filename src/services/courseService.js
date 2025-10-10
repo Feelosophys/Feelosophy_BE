@@ -5,8 +5,8 @@ const Course = require('../models/Course');
 const UserCourse = require('../models/UserCourse');
 const User = require('../models/User');
 const Lesson = require('../models/Lesson');
-require('../models/Video');
-require('../models/Document');
+const Video = require('../models/Video');
+const Document = require('../models/Document');
 const CustomError = require('../utils/customError');
 
 const buildLessonContent = (lessonDocs = []) => {
@@ -1266,7 +1266,12 @@ class CourseService {
     }
 
     async createCourse(courseData) {
-        try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    let savedCourseId = null;
+
+    try {
             const {
                 title,
                 description,
@@ -1279,7 +1284,8 @@ class CourseService {
                 courseImg,
                 instructor,
                 features = [],
-                isPublished = false
+                isPublished = false,
+                lessons = []
             } = courseData;
 
             // Validate required fields
@@ -1287,29 +1293,51 @@ class CourseService {
                 throw new CustomError('Missing required fields: title, description, price, category, instructor', 400);
             }
 
+            const parsedPrice = Number(price);
+            if (Number.isNaN(parsedPrice)) {
+                throw new CustomError('Price must be a valid number', 400);
+            }
+
+            const parsedOriginalPrice = originalPrice !== undefined && originalPrice !== null ? Number(originalPrice) : parsedPrice;
+            if (Number.isNaN(parsedOriginalPrice)) {
+                throw new CustomError('Original price must be a valid number', 400);
+            }
+
+            const parsedTotalHours = totalHours !== undefined && totalHours !== null ? Number(totalHours) : 0;
+            if (Number.isNaN(parsedTotalHours)) {
+                throw new CustomError('Total hours must be a valid number', 400);
+            }
+
             // Validate instructor exists and is a teacher
-            const instructorUser = await User.findById(instructor);
+            const instructorUser = await User.findById(instructor).session(session);
             if (!instructorUser) {
                 throw new CustomError('Instructor not found', 404);
             }
 
-            if (instructorUser.role !== 'teacher') {
+            const isTeacher = instructorUser.role === 'teacher' || (Array.isArray(instructorUser.roles) && instructorUser.roles.includes('teacher'));
+            if (!isTeacher) {
                 throw new CustomError('Instructor must be a teacher', 400);
             }
 
             // Create new course
+            const normalizedFeatures = Array.isArray(features)
+                ? features
+                : typeof features === 'string' && features.trim().length > 0
+                    ? [features.trim()]
+                    : [];
+
             const newCourse = new Course({
                 title: title.trim(),
                 description: description.trim(),
-                price: parseFloat(price),
-                originalPrice: originalPrice ? parseFloat(originalPrice) : parseFloat(price),
+                price: parsedPrice,
+                originalPrice: parsedOriginalPrice,
                 category: category.trim(),
                 ageRange: ageRange || null,
                 courseType: courseType || 'individual',
-                totalHours: totalHours ? parseFloat(totalHours) : 0,
+                totalHours: parsedTotalHours,
                 courseImg: courseImg ? courseImg.trim() : null,
                 instructor,
-                features,
+                features: normalizedFeatures,
                 isPublished,
                 enrolledUsers: [],
                 lessons: [],
@@ -1317,18 +1345,107 @@ class CourseService {
                 reviews: []
             });
 
-            const savedCourse = await newCourse.save();
+            const savedCourse = await newCourse.save({ session });
 
-            // Populate instructor info for response
-            await savedCourse.populate('instructor', 'name email avatar bio');
+            const lessonIds = [];
 
-            return savedCourse;
+            if (Array.isArray(lessons) && lessons.length > 0) {
+                for (const lessonInput of lessons) {
+                    if (!lessonInput || !lessonInput.title) {
+                        continue;
+                    }
+
+                    const lessonDoc = new Lesson({
+                        course: savedCourse._id,
+                        title: lessonInput.title.trim(),
+                        videos: [],
+                        documents: []
+                    });
+
+                    await lessonDoc.save({ session });
+
+                    const videoIds = [];
+                    if (Array.isArray(lessonInput.videos)) {
+                        for (const videoInput of lessonInput.videos) {
+                            if (!videoInput || !videoInput.title || !videoInput.url) {
+                                continue;
+                            }
+
+                            const hasDuration = videoInput.duration !== undefined && videoInput.duration !== null && videoInput.duration !== '';
+                            const parsedDuration = hasDuration ? Number(videoInput.duration) : undefined;
+                            if (parsedDuration !== undefined && Number.isNaN(parsedDuration)) {
+                                throw new CustomError('Video duration must be a valid number', 400);
+                            }
+
+                            const videoDoc = new Video({
+                                title: videoInput.title.trim(),
+                                url: videoInput.url.trim(),
+                                duration: parsedDuration,
+                                lessonId: lessonDoc._id
+                            });
+
+                            await videoDoc.save({ session });
+                            videoIds.push(videoDoc._id);
+                        }
+                    }
+
+                    const documentIds = [];
+                    if (Array.isArray(lessonInput.documents)) {
+                        for (const documentInput of lessonInput.documents) {
+                            if (!documentInput || !documentInput.name || !documentInput.fileUrl) {
+                                continue;
+                            }
+
+                            const documentDoc = new Document({
+                                name: documentInput.name.trim(),
+                                fileUrl: documentInput.fileUrl.trim(),
+                                lessonId: lessonDoc._id
+                            });
+
+                            await documentDoc.save({ session });
+                            documentIds.push(documentDoc._id);
+                        }
+                    }
+
+                    if (videoIds.length > 0 || documentIds.length > 0) {
+                        lessonDoc.videos = videoIds;
+                        lessonDoc.documents = documentIds;
+                        await lessonDoc.save({ session });
+                    }
+
+                    lessonIds.push(lessonDoc._id);
+                }
+            }
+
+            if (lessonIds.length > 0) {
+                await Course.updateOne({ _id: savedCourse._id }, { lessons: lessonIds }, { session });
+            }
+
+            savedCourseId = savedCourse._id;
+
+            await session.commitTransaction();
         } catch (error) {
+            await session.abortTransaction();
             if (error instanceof CustomError) {
                 throw error;
             }
             throw new CustomError(`Error creating course: ${error.message}`, 500);
+        } finally {
+            session.endSession();
         }
+
+        const populatedCourse = await Course.findById(savedCourseId)
+            .populate('instructor', 'name email avatar bio')
+            .populate({
+                path: 'lessons',
+                populate: [{ path: 'videos' }, { path: 'documents' }]
+            });
+
+        if (!populatedCourse) {
+            throw new CustomError('Course not found after creation', 404);
+        }
+
+        return populatedCourse;
     }
 }
 

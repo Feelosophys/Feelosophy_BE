@@ -233,6 +233,107 @@ class CourseController {
     });
 
     // POST /api/v1/courses - Teacher only endpoint
+    /**
+     * @swagger
+     * /api/v1/courses:
+     *   post:
+     *     summary: Create a new course
+     *     tags: [Courses]
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - title
+     *               - description
+     *               - price
+     *               - category
+     *             properties:
+     *               title:
+     *                 type: string
+     *                 example: "Kỹ năng quản lý cảm xúc"
+     *               description:
+     *                 type: string
+     *                 example: "Khóa học giúp bạn kiểm soát và điều hướng cảm xúc trong cuộc sống"
+     *               price:
+     *                 type: number
+     *                 example: 1299000
+     *               originalPrice:
+     *                 type: number
+     *               category:
+     *                 type: string
+     *                 example: "Tâm lý"
+     *               ageRange:
+     *                 type: string
+     *                 example: "18-35"
+     *               courseType:
+     *                 type: string
+     *                 enum: [individual, corporate, group]
+     *                 default: individual
+     *               totalHours:
+     *                 type: number
+     *                 example: 12
+     *               courseImg:
+     *                 type: string
+     *                 format: uri
+     *               features:
+     *                 type: array
+     *                 items:
+     *                   type: string
+     *               isPublished:
+     *                 type: boolean
+     *               lessons:
+     *                 type: array
+     *                 description: "Optional list of lessons to create along with the course"
+     *                 items:
+     *                   type: object
+     *                   required:
+     *                     - title
+     *                   properties:
+     *                     title:
+     *                       type: string
+     *                       example: "Giới thiệu về cảm xúc"
+     *                     videos:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         required:
+     *                           - title
+     *                           - url
+     *                         properties:
+     *                           title:
+     *                             type: string
+     *                           url:
+     *                             type: string
+     *                             format: uri
+     *                           duration:
+     *                             type: number
+     *                             description: "Duration in seconds"
+     *                     documents:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         required:
+     *                           - name
+     *                           - fileUrl
+     *                         properties:
+     *                           name:
+     *                             type: string
+     *                           fileUrl:
+     *                             type: string
+     *                             format: uri
+     *     responses:
+     *       201:
+     *         description: Course created successfully
+     *       400:
+     *         description: Validation failed or missing required data
+     *       401:
+     *         description: Unauthorized
+     */
     createCourse = catchAsync(async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
