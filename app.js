@@ -23,6 +23,7 @@ const appointmentRoutes = require('./src/routes/appointmentRoutes');
 const forumRoutes = require('./src/routes/forumRoutes');
 const courseRoutes = require('./src/routes/courseRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/v1/appointments', appointmentRoutes);
 app.use('/api/v1/forum', forumRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Swagger docs
 setupSwagger(app);
