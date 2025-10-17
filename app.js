@@ -1,19 +1,15 @@
 // app.js
 // Configures Express app, middlewares, routers, Swagger, error handler
+
 const express = require('express');
 const morgan = require('morgan');
 const session = require('express-session');
 const passport = require('./src/config/passportConfig');
-const {
-    corsMiddleware,
-    helmetMiddleware
-} = require('./src/config/securityConfig');
-const {
-    setupSwagger
-} = require('./src/config/swaggerConfig');
+const { corsMiddleware, helmetMiddleware } = require('./src/config/securityConfig');
+const { setupSwagger } = require('./src/config/swaggerConfig');
 const errorHandler = require('./src/middlewares/errorHandler');
 
-// create for api 
+// API routes
 const authRoutes = require('./src/routes/authRoutes');
 const blogRoutes = require('./src/routes/blogRoutes');
 const userRoutes = require('./src/routes/userRoutes');
@@ -27,26 +23,25 @@ const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
 
+// ===== Middlewares =====
 app.use(corsMiddleware);
 app.use(helmetMiddleware);
 app.use(express.json());
-app.use(express.urlencoded({
-    extended: true
-}));
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-// Session middleware for Passport
-app.use(session({
+// ===== Session & Passport =====
+app.use(
+  session({
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
-    saveUninitialized: false
-}));
-
-// Initialize Passport
+    saveUninitialized: false,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Mount API routers
+// ===== API Routers =====
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/blogs', blogRoutes);
 app.use('/api/v1/users', userRoutes);
@@ -58,10 +53,14 @@ app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/admin', adminRoutes);
 
-// Swagger docs
+// ===== Health Check Routes (for Render) =====
+app.get('/', (req, res) => res.status(200).send('✅ Backend is running'));
+app.get('/healthz', (req, res) => res.status(200).send('OK'));
+
+// ===== Swagger Docs =====
 setupSwagger(app);
 
-// Global error handler (last)
+// ===== Global Error Handler =====
 app.use(errorHandler);
 
 module.exports = app;
