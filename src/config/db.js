@@ -2,6 +2,13 @@
 // Handles MongoDB connection using Mongoose
 const mongoose = require('mongoose');
 
+// Optional debug output when DEBUG_MONGOOSE=1
+if (process.env.DEBUG_MONGOOSE === '1') {
+    mongoose.set('debug', (collectionName, method, query, doc) => {
+        console.log(`[mongoose:${collectionName}.${method}]`, JSON.stringify(query), doc ? JSON.stringify(doc) : '');
+    });
+}
+
 const connectDB = async () => {
     try {
         if (!process.env.MONGODB_URI) {

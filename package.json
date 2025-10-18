@@ -4,8 +4,9 @@
   "description": "A modular Node.js backend inspired by Spring Boot architecture.",
   "main": "server.js",
   "scripts": {
-  "dev": "nodemon server.js",
-  "start": "node server.js"
+    "dev": "nodemon server.js",
+    "doctor": "node scripts/doctor.js",
+    "start": "node scripts/doctor.js && node server.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
