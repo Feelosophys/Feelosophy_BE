@@ -6,7 +6,18 @@
  - Exits non‑zero on failure so Render logs capture the reason
 */
 
+const path = require('path');
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+
+// Load .env when running locally (Render injects envs by itself)
+const envPath = process.env.DOTENV_PATH || path.resolve(process.cwd(), '.env');
+const dotenvResult = dotenv.config({ path: envPath });
+if (dotenvResult.error) {
+  console.log('No .env file loaded (this is OK on Render). Looking for file at:', envPath);
+} else {
+  console.log('Loaded .env from:', envPath);
+}
 
 function maskSecret(value, { keepStart = 2, keepEnd = 2 } = {}) {
   if (!value) return '<empty>';
