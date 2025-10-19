@@ -2,11 +2,14 @@
 const cors = require('cors');
 const helmet = require('helmet');
 
-// Allow frontend domain in production
+// Allow multiple frontend domains
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
     process.env.FRONTEND_URL,
+    'https://fe-three-topaz.vercel.app', // Vercel default URL
+    'https://feelosophy.io.vn', // Custom domain
+    'https://www.feelosophy.io.vn', // www subdomain
 ].filter(Boolean);
 
 const corsMiddleware = cors({
@@ -23,10 +26,13 @@ const corsMiddleware = cors({
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log('❌ CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true, // Allow cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
 const helmetMiddleware = helmet();
