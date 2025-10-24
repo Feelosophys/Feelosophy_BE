@@ -59,7 +59,7 @@ const mapCourseForFrontend = (course) => {
     createdDate: course.createdDate ? course.createdDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     lastUpdated: course.lastUpdated ? course.lastUpdated.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     duration: course.duration,
-    image: course.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSB6Kq8NJToK5aQZDvrLMFViFup0kXwzQvmQQ&s',
+    image: course.courseImg || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSB6Kq8NJToK5aQZDvrLMFViFup0kXwzQvmQQ&s',
   };
 };
 
